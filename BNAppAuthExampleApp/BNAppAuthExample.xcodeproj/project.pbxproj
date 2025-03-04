@@ -1,0 +1,738 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		366886FD2A38962600146D59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366886FC2A38962600146D59 /* AppDelegate.swift */; };
+		366886FF2A38962600146D59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366886FE2A38962600146D59 /* SceneDelegate.swift */; };
+		366887042A38962600146D59 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 366887022A38962600146D59 /* Main.storyboard */; };
+		366887062A38962700146D59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 366887052A38962700146D59 /* Assets.xcassets */; };
+		366887092A38962700146D59 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 366887072A38962700146D59 /* LaunchScreen.storyboard */; };
+		366887142A38962700146D59 /* BNAppAuthExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366887132A38962700146D59 /* BNAppAuthExampleTests.swift */; };
+		3668871E2A38962700146D59 /* BNAppAuthExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3668871D2A38962700146D59 /* BNAppAuthExampleUITests.swift */; };
+		366887202A38962700146D59 /* BNAppAuthExampleUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3668871F2A38962700146D59 /* BNAppAuthExampleUITestsLaunchTests.swift */; };
+		3681884C2AC5BA4600D77F0A /* SessionMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3681884B2AC5BA4600D77F0A /* SessionMigration.swift */; };
+		36BDE1C02AA25E0B00D29C46 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BDE1BF2AA25E0B00D29C46 /* TableViewController.swift */; };
+		36D50C0E2ACC0BD50022A027 /* BNAppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 36D50C0D2ACC0BD50022A027 /* BNAppAuth */; };
+		36F7863C2B34652300A83282 /* BNAppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 36F7863B2B34652300A83282 /* BNAppAuth */; };
+		36F7863E2B44116A00A83282 /* BNAppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 36F7863D2B44116A00A83282 /* BNAppAuth */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		366887102A38962700146D59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 366886F12A38962600146D59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 366886F82A38962600146D59;
+			remoteInfo = BNAppAuthExample;
+		};
+		3668871A2A38962700146D59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 366886F12A38962600146D59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 366886F82A38962600146D59;
+			remoteInfo = BNAppAuthExample;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		366886F92A38962600146D59 /* BNAppAuthExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BNAppAuthExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		366886FC2A38962600146D59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		366886FE2A38962600146D59 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		366887032A38962600146D59 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		366887052A38962700146D59 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		366887082A38962700146D59 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3668870A2A38962700146D59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3668870F2A38962700146D59 /* BNAppAuthExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BNAppAuthExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		366887132A38962700146D59 /* BNAppAuthExampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNAppAuthExampleTests.swift; sourceTree = "<group>"; };
+		366887192A38962700146D59 /* BNAppAuthExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BNAppAuthExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3668871D2A38962700146D59 /* BNAppAuthExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNAppAuthExampleUITests.swift; sourceTree = "<group>"; };
+		3668871F2A38962700146D59 /* BNAppAuthExampleUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNAppAuthExampleUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3681884B2AC5BA4600D77F0A /* SessionMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionMigration.swift; sourceTree = "<group>"; };
+		36BDE1BE2A9FDAF800D29C46 /* BNAppAuthExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BNAppAuthExample.entitlements; sourceTree = "<group>"; };
+		36BDE1BF2AA25E0B00D29C46 /* TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
+		36D50BF92ACC0B510022A027 /* BNAppAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNAppAuth.swift; sourceTree = "<group>"; };
+		36D50BFB2ACC0B510022A027 /* ClientConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientConfiguration.swift; sourceTree = "<group>"; };
+		36D50BFD2ACC0B510022A027 /* BNAppAuth+Globals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BNAppAuth+Globals.swift"; sourceTree = "<group>"; };
+		36D50BFE2ACC0B510022A027 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		36D50C002ACC0B510022A027 /* Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Testable.swift; sourceTree = "<group>"; };
+		36D50C022ACC0B510022A027 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		36D50C032ACC0B510022A027 /* JWTDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTDecoder.swift; sourceTree = "<group>"; };
+		36D50C052ACC0B510022A027 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		36D50C062ACC0B510022A027 /* KeychainWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainWrapper.swift; sourceTree = "<group>"; };
+		36D50C072ACC0B510022A027 /* AuthStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStorage.swift; sourceTree = "<group>"; };
+		36D50C0C2ACC0BC50022A027 /* bn-app-auth-ios */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "bn-app-auth-ios"; path = ..; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		366886F62A38962600146D59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36F7863C2B34652300A83282 /* BNAppAuth in Frameworks */,
+				36F7863E2B44116A00A83282 /* BNAppAuth in Frameworks */,
+				36D50C0E2ACC0BD50022A027 /* BNAppAuth in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3668870C2A38962700146D59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		366887162A38962700146D59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		366886F02A38962600146D59 = {
+			isa = PBXGroup;
+			children = (
+				36D50C0B2ACC0BC50022A027 /* Packages */,
+				366886FB2A38962600146D59 /* BNAppAuthExample */,
+				366887122A38962700146D59 /* BNAppAuthExampleTests */,
+				3668871C2A38962700146D59 /* BNAppAuthExampleUITests */,
+				366886FA2A38962600146D59 /* Products */,
+				3668872D2A38968700146D59 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		366886FA2A38962600146D59 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				366886F92A38962600146D59 /* BNAppAuthExample.app */,
+				3668870F2A38962700146D59 /* BNAppAuthExampleTests.xctest */,
+				366887192A38962700146D59 /* BNAppAuthExampleUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		366886FB2A38962600146D59 /* BNAppAuthExample */ = {
+			isa = PBXGroup;
+			children = (
+				36BDE1BE2A9FDAF800D29C46 /* BNAppAuthExample.entitlements */,
+				366886FC2A38962600146D59 /* AppDelegate.swift */,
+				366886FE2A38962600146D59 /* SceneDelegate.swift */,
+				36BDE1BF2AA25E0B00D29C46 /* TableViewController.swift */,
+				366887022A38962600146D59 /* Main.storyboard */,
+				366887052A38962700146D59 /* Assets.xcassets */,
+				366887072A38962700146D59 /* LaunchScreen.storyboard */,
+				3668870A2A38962700146D59 /* Info.plist */,
+				3681884B2AC5BA4600D77F0A /* SessionMigration.swift */,
+			);
+			path = BNAppAuthExample;
+			sourceTree = "<group>";
+		};
+		366887122A38962700146D59 /* BNAppAuthExampleTests */ = {
+			isa = PBXGroup;
+			children = (
+				366887132A38962700146D59 /* BNAppAuthExampleTests.swift */,
+			);
+			path = BNAppAuthExampleTests;
+			sourceTree = "<group>";
+		};
+		3668871C2A38962700146D59 /* BNAppAuthExampleUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3668871D2A38962700146D59 /* BNAppAuthExampleUITests.swift */,
+				3668871F2A38962700146D59 /* BNAppAuthExampleUITestsLaunchTests.swift */,
+			);
+			path = BNAppAuthExampleUITests;
+			sourceTree = "<group>";
+		};
+		3668872D2A38968700146D59 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				36D50BF82ACC0B510022A027 /* BNAppAuth */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		36D50BF82ACC0B510022A027 /* BNAppAuth */ = {
+			isa = PBXGroup;
+			children = (
+				36D50BF92ACC0B510022A027 /* BNAppAuth.swift */,
+				36D50BFA2ACC0B510022A027 /* Models */,
+				36D50BFC2ACC0B510022A027 /* Definitions */,
+				36D50BFF2ACC0B510022A027 /* Protocols */,
+				36D50C012ACC0B510022A027 /* Helpers */,
+				36D50C042ACC0B510022A027 /* AuthStorage */,
+			);
+			name = BNAppAuth;
+			path = ../Sources/BNAppAuth;
+			sourceTree = "<group>";
+		};
+		36D50BFA2ACC0B510022A027 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				36D50BFB2ACC0B510022A027 /* ClientConfiguration.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		36D50BFC2ACC0B510022A027 /* Definitions */ = {
+			isa = PBXGroup;
+			children = (
+				36D50BFD2ACC0B510022A027 /* BNAppAuth+Globals.swift */,
+				36D50BFE2ACC0B510022A027 /* Errors.swift */,
+			);
+			path = Definitions;
+			sourceTree = "<group>";
+		};
+		36D50BFF2ACC0B510022A027 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				36D50C002ACC0B510022A027 /* Testable.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		36D50C012ACC0B510022A027 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				36D50C022ACC0B510022A027 /* Logger.swift */,
+				36D50C032ACC0B510022A027 /* JWTDecoder.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		36D50C042ACC0B510022A027 /* AuthStorage */ = {
+			isa = PBXGroup;
+			children = (
+				36D50C052ACC0B510022A027 /* Constants.swift */,
+				36D50C062ACC0B510022A027 /* KeychainWrapper.swift */,
+				36D50C072ACC0B510022A027 /* AuthStorage.swift */,
+			);
+			path = AuthStorage;
+			sourceTree = "<group>";
+		};
+		36D50C0B2ACC0BC50022A027 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				36D50C0C2ACC0BC50022A027 /* bn-app-auth-ios */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		366886F82A38962600146D59 /* BNAppAuthExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 366887232A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExample" */;
+			buildPhases = (
+				366886F52A38962600146D59 /* Sources */,
+				366886F62A38962600146D59 /* Frameworks */,
+				366886F72A38962600146D59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BNAppAuthExample;
+			packageProductDependencies = (
+				36D50C0D2ACC0BD50022A027 /* BNAppAuth */,
+				36F7863B2B34652300A83282 /* BNAppAuth */,
+				36F7863D2B44116A00A83282 /* BNAppAuth */,
+			);
+			productName = BNAppAuthExample;
+			productReference = 366886F92A38962600146D59 /* BNAppAuthExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3668870E2A38962700146D59 /* BNAppAuthExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 366887262A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExampleTests" */;
+			buildPhases = (
+				3668870B2A38962700146D59 /* Sources */,
+				3668870C2A38962700146D59 /* Frameworks */,
+				3668870D2A38962700146D59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				366887112A38962700146D59 /* PBXTargetDependency */,
+			);
+			name = BNAppAuthExampleTests;
+			productName = BNAppAuthExampleTests;
+			productReference = 3668870F2A38962700146D59 /* BNAppAuthExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		366887182A38962700146D59 /* BNAppAuthExampleUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 366887292A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExampleUITests" */;
+			buildPhases = (
+				366887152A38962700146D59 /* Sources */,
+				366887162A38962700146D59 /* Frameworks */,
+				366887172A38962700146D59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3668871B2A38962700146D59 /* PBXTargetDependency */,
+			);
+			name = BNAppAuthExampleUITests;
+			productName = BNAppAuthExampleUITests;
+			productReference = 366887192A38962700146D59 /* BNAppAuthExampleUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		366886F12A38962600146D59 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					366886F82A38962600146D59 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					3668870E2A38962700146D59 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = 366886F82A38962600146D59;
+					};
+					366887182A38962700146D59 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = 366886F82A38962600146D59;
+					};
+				};
+			};
+			buildConfigurationList = 366886F42A38962600146D59 /* Build configuration list for PBXProject "BNAppAuthExample" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 366886F02A38962600146D59;
+			packageReferences = (
+				36F7863A2B34652300A83282 /* XCLocalSwiftPackageReference ".." */,
+			);
+			productRefGroup = 366886FA2A38962600146D59 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				366886F82A38962600146D59 /* BNAppAuthExample */,
+				3668870E2A38962700146D59 /* BNAppAuthExampleTests */,
+				366887182A38962700146D59 /* BNAppAuthExampleUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		366886F72A38962600146D59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				366887092A38962700146D59 /* LaunchScreen.storyboard in Resources */,
+				366887062A38962700146D59 /* Assets.xcassets in Resources */,
+				366887042A38962600146D59 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3668870D2A38962700146D59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		366887172A38962700146D59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		366886F52A38962600146D59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				366886FD2A38962600146D59 /* AppDelegate.swift in Sources */,
+				366886FF2A38962600146D59 /* SceneDelegate.swift in Sources */,
+				36BDE1C02AA25E0B00D29C46 /* TableViewController.swift in Sources */,
+				3681884C2AC5BA4600D77F0A /* SessionMigration.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3668870B2A38962700146D59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				366887142A38962700146D59 /* BNAppAuthExampleTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		366887152A38962700146D59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3668871E2A38962700146D59 /* BNAppAuthExampleUITests.swift in Sources */,
+				366887202A38962700146D59 /* BNAppAuthExampleUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		366887112A38962700146D59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 366886F82A38962600146D59 /* BNAppAuthExample */;
+			targetProxy = 366887102A38962700146D59 /* PBXContainerItemProxy */;
+		};
+		3668871B2A38962700146D59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 366886F82A38962600146D59 /* BNAppAuthExample */;
+			targetProxy = 3668871A2A38962700146D59 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		366887022A38962600146D59 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				366887032A38962600146D59 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		366887072A38962700146D59 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				366887082A38962700146D59 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		366887212A38962700146D59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		366887222A38962700146D59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		366887242A38962700146D59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BNAppAuthExample/BNAppAuthExample.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BNAppAuthExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		366887252A38962700146D59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BNAppAuthExample/BNAppAuthExample.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BNAppAuthExample/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		366887272A38962700146D59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BNAppAuthExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BNAppAuthExample";
+			};
+			name = Debug;
+		};
+		366887282A38962700146D59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BNAppAuthExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BNAppAuthExample";
+			};
+			name = Release;
+		};
+		3668872A2A38962700146D59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExampleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = BNAppAuthExample;
+			};
+			name = Debug;
+		};
+		3668872B2A38962700146D59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7ZGAATP843;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.bonnernews.bnappauth.example.BNAppAuthExampleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = BNAppAuthExample;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		366886F42A38962600146D59 /* Build configuration list for PBXProject "BNAppAuthExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				366887212A38962700146D59 /* Debug */,
+				366887222A38962700146D59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		366887232A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				366887242A38962700146D59 /* Debug */,
+				366887252A38962700146D59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		366887262A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				366887272A38962700146D59 /* Debug */,
+				366887282A38962700146D59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		366887292A38962700146D59 /* Build configuration list for PBXNativeTarget "BNAppAuthExampleUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3668872A2A38962700146D59 /* Debug */,
+				3668872B2A38962700146D59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		36F7863A2B34652300A83282 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		36D50C0D2ACC0BD50022A027 /* BNAppAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BNAppAuth;
+		};
+		36F7863B2B34652300A83282 /* BNAppAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BNAppAuth;
+		};
+		36F7863D2B44116A00A83282 /* BNAppAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BNAppAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 366886F12A38962600146D59 /* Project object */;
+}

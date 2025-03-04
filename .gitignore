@@ -1,0 +1,5 @@
+.DS_Store
+.swiftpm
+xcuserdata
+BNAppAuthExampleApp_Android/.idea/deploymentTargetDropDown.xml
+BNAppAuth_iOS/.build
