@@ -473,6 +473,53 @@ final class bn_app_authTests: XCTestCase {
         
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
+    
+    func testLogin_withLocaleSet_shouldHaveIncludedParameterInRequest() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        sut.delegate = delegateMock
+        
+        let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
+
+        authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
+            if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
+                XCTAssert(request.additionalParameters?["ui_locales"] == "sv-SE")
+            } else {
+                XCTFail("Should not get here")
+            }
+            
+            defaultAuthorizationFlowExpectation.fulfill()
+        }
+        
+        sut.login(locale: "sv-SE") { result in
+            XCTFail("Should not get here")
+        }
+        
+        wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
+    }
+    
+    func testCreateAccount_withLocaleSet_shouldHaveIncludedParameterInRequest() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        sut.delegate = delegateMock
+        
+        let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
+
+        authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
+            if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
+                XCTAssert(request.additionalParameters?["ui_locales"] == "sv-SE")
+                XCTAssert(request.additionalParameters?["action"] == "create-user")
+            } else {
+                XCTFail("Should not get here")
+            }
+            
+            defaultAuthorizationFlowExpectation.fulfill()
+        }
+        
+        sut.createAccount(locale: "sv-SE") { result in
+            XCTFail("Should not get here")
+        }
+        
+        wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
+    }
 
     func testClearState_whenStateIsSet_shouldClearState() throws {
         authStorageMock._storedState = MockHelper.authStateMock()
