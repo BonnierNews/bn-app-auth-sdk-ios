@@ -106,7 +106,7 @@ public class BNAppAuth: NSObject {
             }
             
             if let locale {
-                additionalParameters["locale"] = locale
+                additionalParameters["ui_locales"] = locale
             }
             
             let request = OIDAuthorizationRequest(

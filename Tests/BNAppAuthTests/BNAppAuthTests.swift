@@ -482,7 +482,7 @@ final class bn_app_authTests: XCTestCase {
 
         authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
             if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
-                XCTAssert(request.additionalParameters?["locale"] == "sv-SE")
+                XCTAssert(request.additionalParameters?["ui_locales"] == "sv-SE")
             } else {
                 XCTFail("Should not get here")
             }
@@ -505,7 +505,7 @@ final class bn_app_authTests: XCTestCase {
 
         authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
             if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
-                XCTAssert(request.additionalParameters?["locale"] == "sv-SE")
+                XCTAssert(request.additionalParameters?["ui_locales"] == "sv-SE")
                 XCTAssert(request.additionalParameters?["action"] == "create-user")
             } else {
                 XCTFail("Should not get here")
