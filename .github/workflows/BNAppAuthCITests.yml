@@ -1,0 +1,22 @@
+name: BNAppAuth CI Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'feature/**' 
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode version
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run Swift Package Tests
+        run: swift test --enable-code-coverage
