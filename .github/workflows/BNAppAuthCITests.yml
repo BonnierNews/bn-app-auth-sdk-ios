@@ -20,8 +20,6 @@ jobs:
 
       - name: Run Swift Package Tests on iOS Simulator
         run: |
-          # Ensure that the iOS Simulator is used for testing
           xcodebuild test \
-            -scheme BNAppAuthTests \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=15.0' \
             -enableCodeCoverage YES
