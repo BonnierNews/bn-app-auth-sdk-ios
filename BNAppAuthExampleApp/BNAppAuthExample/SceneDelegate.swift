@@ -6,7 +6,9 @@
 //
 
 import BNAppAuth
+#if canImport(UIKit)
 import UIKit
+#endif
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 

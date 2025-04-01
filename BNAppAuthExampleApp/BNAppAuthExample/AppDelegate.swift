@@ -5,7 +5,9 @@
 //  Created by Robin Bonin (BN) on 2023-06-13.
 //
 
+#if canImport(UIKit)
 import UIKit
+#endif
 import BNAppAuth
 
 @main
