@@ -12,16 +12,17 @@ jobs:
     runs-on: macos-latest
 
     steps:
-        - name: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-        - name: Select Xcode
+      - name: Select Xcode
         run: sudo xcode-select -switch /Applications/Xcode_16.1.app && /usr/bin/xcodebuild -version
-        - uses: actions/cache@v4
-          with:
-              path: .build
-              key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
-              restore-keys: |
-              ${{ runner.os }}-spm-
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
       - name: Build and test ( iOS 15.5)
-          run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2'
+        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2'
 
