@@ -29,6 +29,11 @@ let package = Package(
             ]),
         .testTarget(
             name: "BNAppAuthTests",
-            dependencies: ["BNAppAuth"]),
+            dependencies: ["BNAppAuth"],
+            path: "Tests",
+            swiftSettings: [
+                .define("PLATFORM_IOS", .when(platforms: [.iOS]))
+            ]
+        ),
     ]
 )
