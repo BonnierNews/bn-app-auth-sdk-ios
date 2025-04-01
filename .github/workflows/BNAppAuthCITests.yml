@@ -18,5 +18,5 @@ jobs:
         run: xcodebuild -showdestinations -scheme BNAppAuth
 
       - name: Build and test ( iOS 15.5)
-        run: xcodebuild test -scheme Earendil -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13 Pro'
+        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13 Pro'
 
