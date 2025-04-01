@@ -17,5 +17,5 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -switch /Applications/Xcode_16.1.app && /usr/bin/xcodebuild -version
       - name: Build and test ( iOS 15.5)
-        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 13 Pro,OS=15.5'
+        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2'
 
