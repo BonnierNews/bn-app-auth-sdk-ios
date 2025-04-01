@@ -14,9 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Show eligible build destinations for BNAppAuth
-        run: xcodebuild -showdestinations -scheme BNAppAuth
-
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app && /usr/bin/xcodebuild -version
       - name: Build and test ( iOS 15.5)
-        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13 Pro'
+        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 13 Pro,OS=15.5'
 
