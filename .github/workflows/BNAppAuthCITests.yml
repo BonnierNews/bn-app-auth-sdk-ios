@@ -20,4 +20,7 @@ jobs:
 
       - name: Run Swift Package Tests
         run: |
-          swift test --destination 'platform=iOS Simulator,name=iPhone 15,OS=15.0'
+          xcodebuild test \
+            -scheme BNAppAuth \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=16.0' \
+            -enableCodeCoverage YES
