@@ -9,6 +9,7 @@ extension BNAppAuth {
         let loginRedirectURL: URL
         let logoutRedirectUrl: URL
         let useCustomBrowser: Bool
+        let customScopes: Array<String>?
         let isDebuggable: Bool
         
         public init(
@@ -19,6 +20,7 @@ extension BNAppAuth {
             loginRedirectURL: URL,
             logoutRedirectUrl: URL,
             useCustomBrowser: Bool = false,
+            customScopes: Array<String>? = nil,
             isDebuggable: Bool = false
         ) {
             self.issuer = issuer
@@ -28,6 +30,7 @@ extension BNAppAuth {
             self.loginRedirectURL = loginRedirectURL
             self.logoutRedirectUrl = logoutRedirectUrl
             self.useCustomBrowser = useCustomBrowser
+            self.customScopes = customScopes
             self.isDebuggable = isDebuggable
         }
     }
