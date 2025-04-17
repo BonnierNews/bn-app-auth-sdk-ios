@@ -50,7 +50,7 @@ enum MockHelper {
             clientSecret: nil,
             loginRedirectURL: URL(string: "login-callback-url")!,
             logoutRedirectUrl: URL(string: "logout-callback-url")!,
-            customScopes: customScopes,
+            customScopes: customScopes
         )
     }
 }
