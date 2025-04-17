@@ -115,7 +115,7 @@ public class BNAppAuth: NSObject {
                 configuration: configuration,
                 clientId: clientId,
                 clientSecret: clientSecret,
-                scopes: [OIDScopeOpenID, OIDScopeProfile, "offline_access"] + customScopes,
+                scopes: [OIDScopeOpenID] + customScopes,
                 redirectURL: clientLoginRedirectUrl,
                 responseType: OIDResponseTypeCode,
                 additionalParameters: additionalParameters

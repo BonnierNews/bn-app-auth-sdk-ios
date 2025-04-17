@@ -536,7 +536,7 @@ final class bn_app_authTests: XCTestCase {
     }
     
     func test_customScopes() throws {
-        sut.configure(client: MockHelper.clientConfiguration(customScopes: ["customScope1", "customScope2"]))
+        sut.configure(client: MockHelper.clientConfiguration(customScopes: ["profile", "offline_access", "customScope1", "customScope2"]))
         sut.delegate = delegateMock
         
         let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
