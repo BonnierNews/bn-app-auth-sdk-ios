@@ -84,6 +84,7 @@ public class BNAppAuth: NSObject {
         let clientId = client.clientId
         let clientSecret = client.clientSecret
         let clientLoginRedirectUrl = client.loginRedirectURL
+        let customScopes = client.customScopes ?? []
         
         authService.discoverConfiguration(
             forIssuer: client.issuer
@@ -114,7 +115,7 @@ public class BNAppAuth: NSObject {
                 configuration: configuration,
                 clientId: clientId,
                 clientSecret: clientSecret,
-                scopes: [OIDScopeOpenID, OIDScopeProfile, "offline_access"],
+                scopes: [OIDScopeOpenID] + customScopes,
                 redirectURL: clientLoginRedirectUrl,
                 responseType: OIDResponseTypeCode,
                 additionalParameters: additionalParameters
