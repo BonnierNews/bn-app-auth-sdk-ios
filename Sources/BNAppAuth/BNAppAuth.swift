@@ -3,6 +3,7 @@ import UIKit
 
 
 
+
 public class BNAppAuth: NSObject {
     public static let shared = BNAppAuth()
 
