@@ -534,4 +534,27 @@ final class bn_app_authTests: XCTestCase {
         sut.didChange(state)
         XCTAssert(authStorageMock.storeInvokeCount == 1)
     }
+    
+    func test_customScopes() throws {
+        sut.configure(client: MockHelper.clientConfiguration(customScopes: ["profile", "offline_access", "customScope1", "customScope2"]))
+        sut.delegate = delegateMock
+        
+        let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
+
+        authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
+            if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
+                XCTAssert(request.scope == "openid profile offline_access customScope1 customScope2")
+            } else {
+                XCTFail("Should not get here")
+            }
+            
+            defaultAuthorizationFlowExpectation.fulfill()
+        }
+        
+        sut.login(locale: "sv-SE") { result in
+            XCTFail("Should not get here")
+        }
+        
+        wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
+    }
 }
