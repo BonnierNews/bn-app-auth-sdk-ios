@@ -20,7 +20,9 @@ let client = BNAppAuth.ClientConfiguration(
     clientId: "client-id",
     clientSecret: nil,
     loginRedirectURL: URL(string: "login-callback-url")!,
-    logoutRedirectUrl: URL(string: "logout-callback-url")!
+    logoutRedirectUrl: URL(string: "logout-callback-url")!,
+    isDebuggable: true, // Enable for debugging
+    customScopes: ["custom-scope"], // Optional
 )
 BNAppAuth.shared.configure(client: client)
 ```
