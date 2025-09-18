@@ -252,7 +252,11 @@ public class BNAppAuth: NSObject {
                         completion(.failure(error))
                     }
                 case .none:
-                    let bnIdToken = authState.lastTokenResponse?.additionalParameters?["bnIdToken"] as? String
+    
+                    let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
+                        ? (authState.lastTokenResponse?.additionalParameters?["old_bnidtoken"] as? String)
+                        : nil
+
                     if let idToken {
                         let tokenResponse = TokenResponse(
                             idToken: idToken,
