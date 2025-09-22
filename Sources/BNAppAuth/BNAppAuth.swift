@@ -235,12 +235,16 @@ public class BNAppAuth: NSObject {
         
         authState.performAction(
             freshTokens: { [weak self] _, idToken, error in
+                let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
+                    ? (authState.lastTokenResponse?.additionalParameters?["old_bnidtoken"] as? String)
+                    : nil
                 switch error {
                 case .some(let error):
                     if self?.isRecoverable(error: error) == true {
                         if let currentToken = self?.currentToken {
                             let recoveredTokenResponse = TokenResponse(
                                 idToken: currentToken,
+                                bnIdToken: bnIdToken,
                                 isUpdated: false
                             )
                             completion(.success(recoveredTokenResponse))
@@ -255,6 +259,7 @@ public class BNAppAuth: NSObject {
                     if let idToken {
                         let tokenResponse = TokenResponse(
                             idToken: idToken,
+                            bnIdToken: bnIdToken,
                             isUpdated: idToken != self?.currentToken
                         )
                         completion(.success(tokenResponse))
