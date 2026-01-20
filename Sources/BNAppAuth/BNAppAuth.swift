@@ -250,7 +250,7 @@ public class BNAppAuth: NSObject {
                 additionalParameters: ["prompt": client.prompt]
             )
 
-            OIDAuthorizationService.perform(request) { [weak self] response, error in
+            authService.perform(request) { [weak self] response, error in
                 authState.update(with: response, error: error)
                 
                 if let error = error {

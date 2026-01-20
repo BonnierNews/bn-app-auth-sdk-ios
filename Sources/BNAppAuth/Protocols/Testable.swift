@@ -10,6 +10,10 @@ import Foundation
 
 public protocol TestableOIDAuthorizationService {
     static func discoverConfiguration(forIssuer issuerURL: URL, completion: @escaping OIDDiscoveryCallback)
+    static func perform(
+        _ request: OIDTokenRequest,
+        callback: @escaping @Sendable OIDTokenCallback
+    )
 }
 
 extension OIDAuthorizationService: TestableOIDAuthorizationService {}
