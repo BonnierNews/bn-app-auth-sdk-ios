@@ -11,8 +11,14 @@ class AuthorizationServiceMock: TestableOIDAuthorizationService {
     )
     static var discoverConfigurationInvokeCount = 0
     static var discoverConfigurationErrorReturnValue: Error?
-    static var discoverConfigurationWasCalled: (() -> Void)?
-    static func discoverConfiguration(forIssuer issuerURL: URL, completion: @escaping OIDDiscoveryCallback) {
+    static var discoverConfigurationWasCalled: (@Sendable () -> Void)?
+    
+    static var performWasCalled: (@Sendable (OIDTokenRequest) -> Void)?
+    static var performStub: (@Sendable (OIDTokenRequest, @escaping OIDTokenCallback) -> Void)?
+    static var performResponseReturnValue: OIDTokenResponse?
+    static var performErrorReturnValue: Error?
+
+    static func discoverConfiguration(forIssuer issuerURL: URL, completion: @escaping @Sendable OIDDiscoveryCallback) {
         discoverConfigurationInvokeCount += 1
         if let discoverConfigurationErrorReturnValue {
             completion(nil,discoverConfigurationErrorReturnValue)
@@ -22,9 +28,24 @@ class AuthorizationServiceMock: TestableOIDAuthorizationService {
         discoverConfigurationWasCalled?()
     }
     
+    static func perform(_ request: OIDTokenRequest, callback: @escaping @Sendable OIDTokenCallback) {
+        performWasCalled?(request)
+        if let performStub = performStub {
+            performStub(request, callback)
+            return
+        }
+        callback(performResponseReturnValue, performErrorReturnValue)
+    }
+    
     static func reset() {
         Self.discoverConfigurationInvokeCount = 0
         Self.discoverConfigurationWasCalled = nil
         Self.discoverConfigurationErrorReturnValue = nil
+        
+        Self.performWasCalled = nil
+        Self.performStub = nil
+        Self.performResponseReturnValue = nil
+        Self.performErrorReturnValue = nil
     }
 }
+

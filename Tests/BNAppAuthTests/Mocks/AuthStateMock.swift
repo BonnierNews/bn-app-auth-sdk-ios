@@ -34,6 +34,15 @@ class AuthStateMock: OIDAuthState {
         }
     }
     
+    var tokenResponseAdditionalParametersReturnValue: [String: (any NSCopying & NSObjectProtocol)]? {
+        get {
+            (lastTokenResponse as? TokenResponseMock)?.additionalParametersReturnValue
+        }
+        set {
+            (lastTokenResponse as? TokenResponseMock)?.additionalParametersReturnValue = newValue
+        }
+    }
+    
     lazy var lastTokenResponseReturnValue: OIDTokenResponse? = TokenResponseMock(
         request: OIDTokenRequest(
             configuration: AuthorizationServiceMock.configurationReturnValue,
@@ -74,8 +83,14 @@ class AuthStateMock: OIDAuthState {
 }
 
 class TokenResponseMock: OIDTokenResponse {
+    var additionalParametersReturnValue: [String: (any NSCopying & NSObjectProtocol)]? = [:]
+    override var additionalParameters: [String : (any NSCopying & NSObjectProtocol)]? {
+        additionalParametersReturnValue
+    }
+    
     var idTokenReturnValue: String? = "tokenId"
     override var idToken: String? {
         idTokenReturnValue
     }
 }
+
