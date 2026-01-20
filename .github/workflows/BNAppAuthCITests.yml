@@ -27,4 +27,4 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Build and test
-        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4'
+        run: xcodebuild test -scheme BNAppAuth -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2'
