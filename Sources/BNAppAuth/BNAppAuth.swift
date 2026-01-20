@@ -222,57 +222,103 @@ public class BNAppAuth: NSObject {
     
     public func getIdToken(
         forceRefresh: Bool = false,
-        completion: @escaping (Result<TokenResponse?,Error>) -> Void
+        getLoginToken: Bool = false, // New parameter
+        completion: @escaping (Result<TokenResponse?, Error>) -> Void
     ) {
         guard let client, let authState else {
             completion(.success(nil))
             return
         }
-        
-        if forceRefresh {
-            authState.setNeedsTokenRefresh()
-        }
-        
-        authState.performAction(
-            freshTokens: { [weak self] _, idToken, error in
-                let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
-                    ? (authState.lastTokenResponse?.additionalParameters?["old_bnidtoken"] as? String)
-                    : nil
-                switch error {
-                case .some(let error):
-                    if self?.isRecoverable(error: error) == true {
-                        if let currentToken = self?.currentToken {
-                            let recoveredTokenResponse = TokenResponse(
-                                idToken: currentToken,
-                                bnIdToken: bnIdToken,
-                                isUpdated: false
-                            )
-                            completion(.success(recoveredTokenResponse))
-                        } else {
-                            completion(.success(nil))
-                        }
-                    } else {
-                        self?.setAuthState(nil)
-                        completion(.failure(error))
-                    }
-                case .none:
-                    if let idToken {
-                        let tokenResponse = TokenResponse(
-                            idToken: idToken,
-                            bnIdToken: bnIdToken,
-                            isUpdated: idToken != self?.currentToken
-                        )
-                        completion(.success(tokenResponse))
-                        self?.currentToken = idToken
-                    } else {
-                        completion(.success(nil))
-                    }
+
+        let currentScopes = authState.lastTokenResponse?.scope?.components(separatedBy: " ") ?? []
+        let needsNewScope = getLoginToken && !currentScopes.contains("getLoginToken")
+
+        if needsNewScope {
+            var scopesToRequest = Set(currentScopes)
+            scopesToRequest.insert("getLoginToken") // change to correct scope
+
+            let request = OIDTokenRequest(
+                configuration: authState.lastAuthorizationResponse.request.configuration,
+                grantType: OIDGrantTypeRefreshToken,
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: client.clientId,
+                clientSecret: client.clientSecret,
+                scope: scopesToRequest.joined(separator: " "),
+                refreshToken: authState.refreshToken,
+                codeVerifier: nil,
+                additionalParameters: ["prompt": client.prompt]
+            )
+
+            OIDAuthorizationService.perform(request) { [weak self] response, error in
+                authState.update(with: response, error: error)
+                
+                if let error = error {
+                    self?.handleTokenError(error, completion: completion)
+                } else {
+                    self?.handleSuccessfulToken(idToken: response?.idToken, completion: completion)
                 }
-            },
-            additionalRefreshParameters: [
-                "prompt": client.prompt
-            ]
+            }
+        } else {
+            if forceRefresh {
+                authState.setNeedsTokenRefresh()
+            }
+
+            authState.performAction(
+                freshTokens: { [weak self] _, idToken, error in
+                    if let error = error {
+                        self?.handleTokenError(error, completion: completion)
+                    } else {
+                        self?.handleSuccessfulToken(idToken: idToken, completion: completion)
+                    }
+                },
+                additionalRefreshParameters: ["prompt": client.prompt]
+            )
+        }
+    }
+    
+    private func handleSuccessfulToken(
+        idToken: String?,
+        completion: @escaping (Result<TokenResponse?, Error>) -> Void
+    ) {
+        guard let idToken = idToken else {
+            completion(.success(nil))
+            return
+        }
+
+        let additionalParams = authState?.lastTokenResponse?.additionalParameters
+        
+        let bnIdToken = (client?.customScopes?.contains("old_bnidtoken") == true)
+            ? (additionalParams?["old_bnidtoken"] as? String)
+            : nil
+            
+        let bnLoginToken = additionalParams?["getLoginToken"] as? String  // change to correct key
+
+        let tokenResponse = TokenResponse(
+            idToken: idToken,
+            bnIdToken: bnIdToken,
+            isUpdated: idToken != self.currentToken,
+            loginToken: bnLoginToken
         )
+        
+        self.currentToken = idToken
+        completion(.success(tokenResponse))
+    }
+
+    private func handleTokenError(
+        _ error: Error,
+        completion: @escaping (Result<TokenResponse?, Error>) -> Void
+    ) {
+        if self.isRecoverable(error: error) == true {
+            if let currentToken = self.currentToken {
+                completion(.success(TokenResponse(idToken: currentToken, isUpdated: false)))
+            } else {
+                completion(.success(nil))
+            }
+        } else {
+            self.setAuthState(nil)
+            completion(.failure(error))
+        }
     }
 
     public func clearState() {

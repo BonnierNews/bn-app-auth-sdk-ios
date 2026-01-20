@@ -21,6 +21,30 @@ class TableViewController: UITableViewController {
         return button
     }()
     
+    lazy var refreshButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Force Refresh", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .systemGray6
+        button.addTarget(self, action: #selector(refreshPressed), for: .touchUpInside)
+        button.layer.cornerRadius = 8
+        button.clipsToBounds = true
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        return button
+    }()
+    
+    lazy var getLoginToken: UIButton = {
+        let button = UIButton()
+        button.setTitle("Get Login Token", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .systemGray6
+        button.addTarget(self, action: #selector(getLoginTokenPressed), for: .touchUpInside)
+        button.layer.cornerRadius = 8
+        button.clipsToBounds = true
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -66,7 +90,7 @@ class TableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 0 {
-            return 90
+            return 189
         }
         return 30
     }
@@ -75,13 +99,25 @@ class TableViewController: UITableViewController {
         if section == 0 {
             let containerView = UIView()
             containerView.addSubview(loginButton)
+            containerView.addSubview(refreshButton)
+            containerView.addSubview(getLoginToken)
             loginButton.translatesAutoresizingMaskIntoConstraints = false
+            refreshButton.translatesAutoresizingMaskIntoConstraints = false
+            getLoginToken.translatesAutoresizingMaskIntoConstraints = false
             
             containerView.addConstraints([
                 loginButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
                 loginButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
                 loginButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
                 loginButton.heightAnchor.constraint(equalToConstant: 48),
+                refreshButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 12),
+                refreshButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+                refreshButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+                refreshButton.heightAnchor.constraint(equalToConstant: 44),
+                getLoginToken.topAnchor.constraint(equalTo: refreshButton.bottomAnchor, constant: 12),
+                getLoginToken.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+                getLoginToken.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+                getLoginToken.heightAnchor.constraint(equalToConstant: 44)
             ])
             
             return containerView
@@ -134,6 +170,46 @@ class TableViewController: UITableViewController {
         }, completion: { _ in
             toastLabel.removeFromSuperview()
         })
+    }
+    
+    @objc private func getLoginTokenPressed() {
+        guard BNAppAuth.shared.isAuthorized else {
+            showToast(message: "Du måste vara inloggad")
+            return
+        }
+        
+        BNAppAuth.shared.getIdToken(getLoginToken: true) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    self?.update()
+                    self?.showToast(message: "Token uppdaterad")
+                case .failure(let error):
+                    self?.showToast(message: "Refresh misslyckades")
+                    print("Refresh error: \(error)")
+                }
+            }
+        }
+    }
+    
+    @objc private func refreshPressed() {
+        guard BNAppAuth.shared.isAuthorized else {
+            showToast(message: "Du måste vara inloggad")
+            return
+        }
+        
+        BNAppAuth.shared.getIdToken(forceRefresh: true) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    self?.update()
+                    self?.showToast(message: "Token uppdaterad")
+                case .failure(let error):
+                    self?.showToast(message: "Refresh misslyckades")
+                    print("Refresh error: \(error)")
+                }
+            }
+        }
     }
 
     private func update() {
