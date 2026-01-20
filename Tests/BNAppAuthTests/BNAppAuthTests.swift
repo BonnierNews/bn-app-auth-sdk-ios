@@ -154,6 +154,38 @@ final class bn_app_authTests: XCTestCase {
 
         wait(for: [expectation1,expectation2,expectation3])
     }
+    
+    func testGetIdToken_withAuthState_shouldReturnToken_withIsUpdatedTrue_forFirstRequest() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        let authState = MockHelper.authStateMock()
+        authState.tokenResponseAdditionalParametersReturnValue = ["getLoginToken": "some-login-token" as NSString]
+    
+        authStorageMock._storedState = authState
+        
+        let expectation = XCTestExpectation(description: "Call getIdToken(getLoginToken: true) with completion")
+        
+        authServiceMock.performStub = { request, callback in
+            let response = TokenResponseMock(
+                request: request,
+                parameters: [:]
+            )
+            callback(response, nil)
+        }
+         
+        
+        sut.getIdToken(getLoginToken: true) { result in
+            switch result {
+            case .success(let tokenResult):
+                XCTAssertNotNil(tokenResult)
+                XCTAssertNotNil(tokenResult!.loginToken)
+            case .failure:
+                XCTFail("Should not produce an error")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation])
+    }
 
     func testGetIdToken_whenPerformActionReturnsError_shouldReturnError() throws {
         sut.configure(client: MockHelper.clientConfiguration())
@@ -558,3 +590,4 @@ final class bn_app_authTests: XCTestCase {
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
 }
+
