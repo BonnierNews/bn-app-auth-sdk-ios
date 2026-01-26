@@ -222,6 +222,7 @@ public class BNAppAuth: NSObject {
     
     public func getIdToken(
         forceRefresh: Bool = false,
+        getLoginToken: Bool = false,
         completion: @escaping (Result<TokenResponse?,Error>) -> Void
     ) {
         guard let client, let authState else {
@@ -229,8 +230,15 @@ public class BNAppAuth: NSObject {
             return
         }
         
-        if forceRefresh {
+        if forceRefresh || getLoginToken {
             authState.setNeedsTokenRefresh()
+        }
+        
+        var refreshParams: [String: String] = [
+            "prompt": client.prompt
+        ]
+        if getLoginToken {
+            refreshParams["issue_login_token"] = "true"
         }
         
         authState.performAction(
@@ -269,9 +277,7 @@ public class BNAppAuth: NSObject {
                     }
                 }
             },
-            additionalRefreshParameters: [
-                "prompt": client.prompt
-            ]
+            additionalRefreshParameters: refreshParams
         )
     }
 
@@ -304,3 +310,4 @@ private extension Result where Success == Void {
         return .success(())
     }
 }
+
