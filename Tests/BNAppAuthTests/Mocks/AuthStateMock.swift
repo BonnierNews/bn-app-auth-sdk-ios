@@ -24,6 +24,15 @@ class AuthStateMock: OIDAuthState {
             _stateChangeDelegate = newValue
         }
     }
+    
+    var tokenResponseAdditionalParametersReturnValue: [String: (any NSCopying & NSObjectProtocol)]? {
+         get {
+             (lastTokenResponse as? TokenResponseMock)?.additionalParametersReturnValue
+         }
+         set {
+             (lastTokenResponse as? TokenResponseMock)?.additionalParametersReturnValue = newValue
+         }
+     }
 
     var tokenResponseIdTokenReturnValue: String? {
         get {
@@ -75,7 +84,13 @@ class AuthStateMock: OIDAuthState {
 
 class TokenResponseMock: OIDTokenResponse {
     var idTokenReturnValue: String? = "tokenId"
+    var additionalParametersReturnValue: [String: (any NSCopying & NSObjectProtocol)]? = ["login_token": "kalle" as NSString]
+    
+    override var additionalParameters: [String : (any NSCopying & NSObjectProtocol)]? {
+          additionalParametersReturnValue
+    }
     override var idToken: String? {
         idTokenReturnValue
     }
 }
+
