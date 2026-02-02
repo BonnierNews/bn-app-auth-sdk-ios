@@ -229,14 +229,11 @@ public class BNAppAuth: NSObject {
             completion(.success(nil))
             return
         }
+        var refreshParams: [String: String] = [:]
         
         if forceRefresh || getLoginToken {
             authState.setNeedsTokenRefresh()
         }
-        
-        var refreshParams: [String: String] = [
-            "prompt": client.prompt
-        ]
         if getLoginToken {
             refreshParams["issue_login_token"] = "true"
         }
