@@ -109,6 +109,28 @@ final class bn_app_authTests: XCTestCase {
         wait(for: [expectation])
     }
     
+    func testGetIdToken_withAuthState_shouldReturnToken_withLoginToken() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        let authState = MockHelper.authStateMock(loginToken: "testToken")
+        authStorageMock._storedState = authState
+        let expectation = XCTestExpectation(description: "Call getIdToken() with completion")
+        authState.performActionIdTokenReturnValue = "newIdToken"
+        
+        sut.getIdToken(getLoginToken: true) { result in
+            switch result {
+            case .success(let tokenResult):
+                XCTAssertNotNil(tokenResult)
+                XCTAssertNotNil(tokenResult!.loginToken)
+                XCTAssertTrue(tokenResult!.isUpdated)
+            case .failure:
+                XCTFail("Should not produce an error")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation])
+    }
+    
     func testMultipleGetIdToken_withAuthState_shouldReturnToken_withIsUpdatedTrue_forFirstRequest() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         let authState = MockHelper.authStateMock()

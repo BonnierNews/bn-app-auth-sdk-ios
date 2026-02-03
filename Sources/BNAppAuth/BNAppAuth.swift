@@ -222,21 +222,29 @@ public class BNAppAuth: NSObject {
     
     public func getIdToken(
         forceRefresh: Bool = false,
+        getLoginToken: Bool = false,
         completion: @escaping (Result<TokenResponse?,Error>) -> Void
     ) {
         guard let client, let authState else {
             completion(.success(nil))
             return
         }
+        var refreshParams: [String: String] = [:]
         
-        if forceRefresh {
+        if forceRefresh || getLoginToken {
             authState.setNeedsTokenRefresh()
+        }
+        if getLoginToken {
+            refreshParams["issue_login_token"] = "true"
         }
         
         authState.performAction(
             freshTokens: { [weak self] _, idToken, error in
                 let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
                     ? (authState.lastTokenResponse?.additionalParameters?["old_bnidtoken"] as? String)
+                    : nil
+                let loginToken = getLoginToken
+                    ? (authState.lastTokenResponse?.additionalParameters?["login_token"] as? String)
                     : nil
                 switch error {
                 case .some(let error):
@@ -245,7 +253,8 @@ public class BNAppAuth: NSObject {
                             let recoveredTokenResponse = TokenResponse(
                                 idToken: currentToken,
                                 bnIdToken: bnIdToken,
-                                isUpdated: false
+                                isUpdated: false,
+                                loginToken: loginToken
                             )
                             completion(.success(recoveredTokenResponse))
                         } else {
@@ -260,7 +269,8 @@ public class BNAppAuth: NSObject {
                         let tokenResponse = TokenResponse(
                             idToken: idToken,
                             bnIdToken: bnIdToken,
-                            isUpdated: idToken != self?.currentToken
+                            isUpdated: idToken != self?.currentToken,
+                            loginToken: loginToken
                         )
                         completion(.success(tokenResponse))
                         self?.currentToken = idToken
@@ -269,9 +279,7 @@ public class BNAppAuth: NSObject {
                     }
                 }
             },
-            additionalRefreshParameters: [
-                "prompt": client.prompt
-            ]
+            additionalRefreshParameters: refreshParams
         )
     }
 
@@ -304,3 +312,4 @@ private extension Result where Success == Void {
         return .success(())
     }
 }
+

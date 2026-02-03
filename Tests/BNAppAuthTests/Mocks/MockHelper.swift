@@ -2,7 +2,7 @@ import AppAuth
 @testable import BNAppAuth
 
 enum MockHelper {
-    static func authStateMock(refreshToken: String = "refreshToken") -> AuthStateMock {
+    static func authStateMock(refreshToken: String = "refreshToken", loginToken: String? = nil) -> AuthStateMock {
         let tokenResponse = OIDTokenResponse(
             request: OIDTokenRequest(
                 configuration: AuthorizationServiceMock.configurationReturnValue,
@@ -14,7 +14,7 @@ enum MockHelper {
                 scope: nil,
                 refreshToken: refreshToken,
                 codeVerifier: nil,
-                additionalParameters: nil
+                additionalParameters: loginToken.map { ["login_token": $0] }
             ),
             parameters: [:]
         )
@@ -54,3 +54,4 @@ enum MockHelper {
         )
     }
 }
+
