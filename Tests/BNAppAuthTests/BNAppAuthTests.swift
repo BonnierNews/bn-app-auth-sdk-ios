@@ -8,6 +8,7 @@ final class bn_app_authTests: XCTestCase {
     var authStorageMock: AuthStorageMock!
     var authServiceMock: AuthorizationServiceMock.Type!
     var authFlowBuilderMock: AuthorizationFlowBuilderMock!
+    var userDefaultsMock: UserDefaultsMock!
     var delegateMock: UIViewController!
     
     override func setUpWithError() throws {
@@ -17,13 +18,17 @@ final class bn_app_authTests: XCTestCase {
         authServiceMock = AuthorizationServiceMock.self
         authServiceMock.reset()
         authFlowBuilderMock = AuthorizationFlowBuilderMock()
+        userDefaultsMock = UserDefaultsMock()
+        userDefaultsMock.set(true, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+    
         
         delegateMock = UIViewController()
         
         sut = BNAppAuth(
             authStorage: authStorageMock,
             authService: authServiceMock,
-            authFlowBuilder: authFlowBuilderMock
+            authFlowBuilder: authFlowBuilderMock,
+            userDefaults: userDefaultsMock,
         )
     }
 
@@ -100,6 +105,43 @@ final class bn_app_authTests: XCTestCase {
             case .success(let tokenResult):
                 XCTAssertNotNil(tokenResult)
                 XCTAssertTrue(tokenResult!.isUpdated)
+            case .failure:
+                XCTFail("Should not produce an error")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation])
+    }
+    
+    
+    func testGetIdToken_withExchange_shouldReturnToken() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        let authState = MockHelper.authStateMock()
+        authStorageMock._storedState = authState
+        let expectation = XCTestExpectation(description: "Call getIdToken() with completion")
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        authState.performActionIdTokenReturnValue = "newIdToken"
+        authServiceMock.performReturnValue = TokenResponseMock(
+            request: OIDTokenRequest(
+                configuration: AuthorizationServiceMock.configurationReturnValue,
+                grantType: "exchange-token",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: "clientId",
+                clientSecret: nil,
+                scope: nil,
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: nil
+            ),
+            parameters: [:]
+        )
+        
+        sut.getIdToken() { result in
+            switch result {
+            case .success(let tokenResult):
+                XCTAssertNotNil(tokenResult)
             case .failure:
                 XCTFail("Should not produce an error")
             }
