@@ -15,15 +15,26 @@ public class BNAppAuth: NSObject {
     private var client: ClientConfiguration?
     private let authFlowBuilder: AuthorizationFlowBuilding
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
+    private let userDefaults: UserDefaults
+    private var needsMigration: Bool {
+        get {
+            !userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        }
+        set {
+            userDefaults.set(newValue, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        }
+    }
     
     public init(
         authStorage: AuthStoraging? = nil,
         authService: TestableOIDAuthorizationService.Type = OIDAuthorizationService.self,
-        authFlowBuilder: AuthorizationFlowBuilding? = nil
+        authFlowBuilder: AuthorizationFlowBuilding? = nil,
+        userDefaults: UserDefaults = .standard
     ) {
         self.authStorage = authStorage ?? defaultAuthStorage()
         self.authService = authService
         self.authFlowBuilder = authFlowBuilder ?? defaultAuthorizationFlowBuilder()
+        self.userDefaults = userDefaults
     }
     
     private lazy var authState: OIDAuthState? = {
@@ -229,6 +240,43 @@ public class BNAppAuth: NSObject {
             completion(.success(nil))
             return
         }
+        
+        if needsMigration, let currentToken = currentToken {
+            needsMigration = false
+            performSilentExchange(oldIdToken: currentToken) { [weak self] success in
+                guard let self = self else { return }
+                
+                if !success {
+                    self.clearState()
+                    completion(.success(nil))
+                    return
+                }
+                self.performTokenRefresh(
+                    client: client,
+                    authState: authState,
+                    forceRefresh: forceRefresh,
+                    getLoginToken: getLoginToken,
+                    completion: completion
+                )
+            }
+            return
+        }
+        performTokenRefresh(
+            client: client,
+            authState: authState,
+            forceRefresh: forceRefresh,
+            getLoginToken: getLoginToken,
+            completion: completion
+        )
+    }
+    
+    private func performTokenRefresh(
+        client: ClientConfiguration,
+        authState: OIDAuthState,
+        forceRefresh: Bool,
+        getLoginToken: Bool,
+        completion: @escaping (Result<TokenResponse?,Error>) -> Void
+    ) {
         var refreshParams: [String: String] = [:]
         
         if forceRefresh || getLoginToken {
@@ -282,6 +330,106 @@ public class BNAppAuth: NSObject {
             additionalRefreshParameters: refreshParams
         )
     }
+    private func performSilentExchange(oldIdToken: String, completion: @escaping (Bool) -> Void) {
+        guard let client = client else {
+            completion(false)
+            return
+        }
+        
+        let exchangeEndpoint = client.issuer.appendingPathComponent("/exchange")
+        
+        exchangeIdToken(oldIdToken: oldIdToken, newExchangeEndpoint: exchangeEndpoint) { result in
+            switch result {
+            case .success(let token):
+                completion(token != nil)
+            case .failure:
+                completion(false)
+            }
+        }
+    }
+    
+    public func exchangeIdToken(
+        oldIdToken: String,
+        newExchangeEndpoint: URL,
+        completion: @escaping (Result<String?,Error>) -> Void
+    ) {
+        guard let client = client else {
+            completion(.success(nil))
+            return
+        }
+        let customScopes = client.customScopes ?? []
+        
+        authService.discoverConfiguration(forIssuer: client.issuer) { [weak self] serviceConfiguration, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                Logger.authentication.error("Error retrieving discovery document: %@", error.localizedDescription)
+                completion(.failure(error))
+                return
+            }
+            
+            guard let serviceConfiguration = serviceConfiguration else {
+                Logger.authentication.error("Failed getting  serviceConfiguration")
+                completion(.success(nil))
+                return
+            }
+            
+            // 1. Create a config pointing to the NEW exchange endpoint
+            let customConfig = OIDServiceConfiguration(
+                authorizationEndpoint: serviceConfiguration.authorizationEndpoint,
+                tokenEndpoint: newExchangeEndpoint
+            )
+            
+            // 2. Build the request with Scopes
+            let additionalParams = [
+                "subject_token": oldIdToken,
+                "subject_token_type": "urn:ietf:params:oauth:token-type:id_token"
+            ]
+            
+            let tokenRequest = OIDTokenRequest(
+                configuration: customConfig,
+                grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: client.clientId,
+                clientSecret: client.clientSecret,
+                scopes: [OIDScopeOpenID] + customScopes,
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: additionalParams
+            )
+            
+            // 3. Perform the token request
+            self.authService.perform(tokenRequest) { [weak self] tokenResponse, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    Logger.authentication.error("Token exchange failed: %@", error.localizedDescription)
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let tokenResponse = tokenResponse else {
+                    completion(.success(nil))
+                    return
+                }
+                
+                // 4. TRANSITION TO ORDINARY FLOW
+                // Create a fresh AuthState using the STANDARD serviceConfiguration
+                let ordinaryState = OIDAuthState(
+                    authorizationResponse: nil,
+                    tokenResponse: tokenResponse,
+                    registrationResponse: nil
+                )
+                
+                // Update the auth state to use standard service configuration for future refreshes
+                ordinaryState.update(with: tokenResponse, error: nil)
+                self.setAuthState(ordinaryState)
+                completion(.success(currentToken))
+            }
+        }
+    }
+    
 
     public func clearState() {
         setAuthState(nil)
