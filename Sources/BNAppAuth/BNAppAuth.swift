@@ -415,17 +415,27 @@ public class BNAppAuth: NSObject {
                 }
                 
                 // 4. TRANSITION TO ORDINARY FLOW
-                // Create a fresh AuthState using the STANDARD serviceConfiguration
-                let ordinaryState = OIDAuthState(
-                    authorizationResponse: nil,
-                    tokenResponse: tokenResponse,
-                    registrationResponse: nil
+                // Build a synthetic authorization response using the STANDARD serviceConfiguration
+                // so that AppAuth has redirect_uri and client_id available for future token refreshes.
+                let authRequest = OIDAuthorizationRequest(
+                    configuration: serviceConfiguration,
+                    clientId: client.clientId,
+                    clientSecret: client.clientSecret,
+                    scopes: [OIDScopeOpenID] + customScopes,
+                    redirectURL: client.loginRedirectURL,
+                    responseType: OIDResponseTypeCode,
+                    additionalParameters: nil
                 )
-                
-                // Update the auth state to use standard service configuration for future refreshes
-                ordinaryState.update(with: tokenResponse, error: nil)
+                let authResponse = OIDAuthorizationResponse(
+                    request: authRequest,
+                    parameters: [:]
+                )
+                let ordinaryState = OIDAuthState(
+                    authorizationResponse: authResponse,
+                    tokenResponse: tokenResponse
+                )
                 self.setAuthState(ordinaryState)
-                completion(.success(currentToken))
+                completion(.success(self.currentToken))
             }
         }
     }
