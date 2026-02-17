@@ -16,9 +16,9 @@ public class BNAppAuth: NSObject {
     private let authFlowBuilder: AuthorizationFlowBuilding
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
     private let userDefaults: UserDefaults
-    private var needsMigration: Bool {
+    private var migrationCompleted: Bool {
         get {
-            !userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+            userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
         }
         set {
             userDefaults.set(newValue, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
@@ -241,8 +241,8 @@ public class BNAppAuth: NSObject {
             return
         }
         
-        if needsMigration, let currentToken = currentToken {
-            needsMigration = false
+        if !migrationCompleted, let currentToken = currentToken {
+            migrationCompleted = true
             performSilentExchange(oldIdToken: currentToken) { [weak self] success in
                 guard let self = self else { return }
                 
@@ -336,7 +336,7 @@ public class BNAppAuth: NSObject {
             return
         }
         
-        let exchangeEndpoint = client.issuer.appendingPathComponent("/exchange")
+        let exchangeEndpoint = client.issuer.appendingPathComponent("/token")
         
         exchangeIdToken(oldIdToken: oldIdToken, newExchangeEndpoint: exchangeEndpoint) { result in
             switch result {
