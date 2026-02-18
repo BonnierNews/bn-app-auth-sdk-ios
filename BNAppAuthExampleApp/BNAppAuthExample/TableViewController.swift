@@ -45,6 +45,18 @@ class TableViewController: UITableViewController {
         return button
     }()
     
+    lazy var exchangeTokenButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Exchange Token", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.backgroundColor = .systemGray6
+        button.addTarget(self, action: #selector(tokenExchangedPressed), for: .touchUpInside)
+        button.layer.cornerRadius = 8
+        button.clipsToBounds = true
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -55,7 +67,7 @@ class TableViewController: UITableViewController {
     
     private func setupTableView() {
         tableView.sectionHeaderTopPadding = 0
-        tableView.estimatedRowHeight = 100
+        tableView.estimatedRowHeight = 120
     }
     
     private func setupNavigation() {
@@ -90,7 +102,7 @@ class TableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 0 {
-            return 189
+            return 289
         }
         return 30
     }
@@ -101,9 +113,11 @@ class TableViewController: UITableViewController {
             containerView.addSubview(loginButton)
             containerView.addSubview(refreshButton)
             containerView.addSubview(getLoginToken)
+            containerView.addSubview(exchangeTokenButton)
             loginButton.translatesAutoresizingMaskIntoConstraints = false
             refreshButton.translatesAutoresizingMaskIntoConstraints = false
             getLoginToken.translatesAutoresizingMaskIntoConstraints = false
+            exchangeTokenButton.translatesAutoresizingMaskIntoConstraints = false
             
             containerView.addConstraints([
                 loginButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
@@ -117,7 +131,12 @@ class TableViewController: UITableViewController {
                 getLoginToken.topAnchor.constraint(equalTo: refreshButton.bottomAnchor, constant: 12),
                 getLoginToken.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
                 getLoginToken.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-                getLoginToken.heightAnchor.constraint(equalToConstant: 44)
+                getLoginToken.heightAnchor.constraint(equalToConstant: 44),
+                exchangeTokenButton.topAnchor.constraint(equalTo: getLoginToken.bottomAnchor, constant: 12),
+                exchangeTokenButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+                exchangeTokenButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+                exchangeTokenButton.heightAnchor.constraint(equalToConstant: 44)
+                
             ])
             
             return containerView
@@ -215,6 +234,41 @@ class TableViewController: UITableViewController {
                 }
             }
         }
+    }
+    
+    @objc private func tokenExchangedPressed() {
+        guard BNAppAuth.shared.isAuthorized else {
+            showToast(message: "Du måste vara inloggad")
+            return
+        }
+        UserDefaults.standard.set(false, forKey: "BnMigrationCompleted")
+        BNAppAuth.shared.getIdToken(getLoginToken: true) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let tokenResponse):
+                    self?.update()
+                    self?.showToast(message: "Token exchange uppdaterad")
+                case .failure(let error):
+                    self?.showToast(message: "Token exchange misslyckades")
+                    self?.update()
+                    print("Refresh error: \(error)")
+                }
+            }
+        }
+        
+//        // Stress test
+//        for i in 1...10 {
+//            print("➡️ Dispatching call #\(i)")
+//            
+//            BNAppAuth.shared.getIdToken(getLoginToken: true) { result in
+//                switch result {
+//                case .success(let response):
+//                    print("✅ Call #\(i) Success: \(response?.idToken.prefix(10) ?? "no-token")...")
+//                case .failure(let error):
+//                    print("❌ Call #\(i) Failed: \(error.localizedDescription)")
+//                }
+//            }
+//        }
     }
 
     private func update() {
