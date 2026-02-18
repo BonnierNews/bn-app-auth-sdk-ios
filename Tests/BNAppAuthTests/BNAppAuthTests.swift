@@ -621,4 +621,103 @@ final class bn_app_authTests: XCTestCase {
         
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
+    
+    func testGetIdToken_whenMigrationRequired_shouldPerformExchangeAndReturnToken() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+
+        let mockState = MockHelper.authStateMock()
+        mockState.performActionIdTokenReturnValue = "final-token"
+        authStorageMock._storedState = mockState
+
+        authServiceMock.performReturnValue = TokenResponseMock(
+            request: OIDTokenRequest(
+                configuration: AuthorizationServiceMock.configurationReturnValue,
+                grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: "clientId",
+                clientSecret: nil,
+                scopes: ["openid"],
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: nil
+            ),
+            parameters: ["id_token": "migrated-token" as NSString]
+        )
+
+        let expectation = XCTestExpectation(description: "Migration should complete")
+
+        sut.getIdToken { result in
+            if case .success(let tokenResult) = result {
+                XCTAssertNotNil(tokenResult)
+                XCTAssertEqual(tokenResult?.idToken, "final-token")
+            } else {
+                XCTFail("Migration failed")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2)
+    }
+    
+    func testGetIdToken_whenMigrationFails_shouldClearStateAndReturnError() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        
+        authStorageMock._storedState = MockHelper.authStateMock()
+        
+        AuthorizationServiceMock.performErrorReturnValue = NSError(domain: "test", code: 401)
+        
+        let expectation = XCTestExpectation(description: "Migration should fail and clear state")
+
+        sut.getIdToken { result in
+            if case .failure = result {
+                XCTAssertFalse(self.sut.isAuthorized)
+                XCTAssertFalse(self.userDefaultsMock.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue))
+            } else {
+                XCTFail("Should have failed due to mock error")
+            }
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2)
+    }
+    
+    func testGetIdToken_multipleConcurrentCalls_shouldOnlyPerformOneMigration() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        
+        let mockState = MockHelper.authStateMock()
+        mockState.performActionIdTokenReturnValue = "final-token"
+        authStorageMock._storedState = mockState
+
+        AuthorizationServiceMock.performReturnValue = TokenResponseMock(
+            request: OIDTokenRequest(
+                configuration: AuthorizationServiceMock.configurationReturnValue,
+                grantType: "exchange",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: "clientId",
+                clientSecret: nil,
+                scopes: nil,
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: nil
+            ),
+            parameters: ["id_token": "migrated-token" as NSString]
+        )
+
+        let exp1 = XCTestExpectation(description: "Call 1")
+        let exp2 = XCTestExpectation(description: "Call 2")
+        let exp3 = XCTestExpectation(description: "Call 3")
+
+        sut.getIdToken { _ in exp1.fulfill() }
+        sut.getIdToken { _ in exp2.fulfill() }
+        sut.getIdToken { _ in exp3.fulfill() }
+
+        wait(for: [exp1, exp2, exp3], timeout: 5)
+        
+        XCTAssertEqual(AuthorizationServiceMock.performInvokeCount, 1, "The 'Mutex' logic failed: Multiple migration requests were fired.")
+    }
 }

@@ -255,6 +255,20 @@ class TableViewController: UITableViewController {
                 }
             }
         }
+        
+//        // Stress test
+//        for i in 1...10 {
+//            print("➡️ Dispatching call #\(i)")
+//            
+//            BNAppAuth.shared.getIdToken(getLoginToken: true) { result in
+//                switch result {
+//                case .success(let response):
+//                    print("✅ Call #\(i) Success: \(response?.idToken.prefix(10) ?? "no-token")...")
+//                case .failure(let error):
+//                    print("❌ Call #\(i) Failed: \(error.localizedDescription)")
+//                }
+//            }
+//        }
     }
 
     private func update() {

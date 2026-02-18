@@ -16,6 +16,11 @@ public class BNAppAuth: NSObject {
     private let authFlowBuilder: AuthorizationFlowBuilding
     private var currentAuthorizationFlow: OIDExternalUserAgentSession?
     private let userDefaults: UserDefaults
+    
+    private let isolationQueue = DispatchQueue(label: "se.bonniernews.bnappauth.isolation")
+    private var isExecutingAction = false
+    private var pendingCompletions: [() -> Void] = []
+    
     private var migrationCompleted: Bool {
         get {
             userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
@@ -234,40 +239,74 @@ public class BNAppAuth: NSObject {
     public func getIdToken(
         forceRefresh: Bool = false,
         getLoginToken: Bool = false,
-        completion: @escaping (Result<TokenResponse?,Error>) -> Void
+        completion: @escaping (Result<TokenResponse?, Error>) -> Void
     ) {
-        guard let client, let authState else {
-            completion(.success(nil))
-            return
-        }
-        
-        if !migrationCompleted, let currentToken = currentToken {
-            migrationCompleted = true
-            performSilentExchange(oldIdToken: currentToken) { [weak self] success in
-                guard let self = self else { return }
-                
-                if !success {
-                    self.clearState()
-                    completion(.success(nil))
-                    return
-                }
-                self.performTokenRefresh(
-                    client: client,
-                    authState: authState,
-                    forceRefresh: forceRefresh,
-                    getLoginToken: getLoginToken,
-                    completion: completion
-                )
+        isolationQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            guard let client = self.client, let authState = self.authState else {
+                completion(.success(nil))
+                return
             }
-            return
+
+            // If a migration is in progress, WAIT.
+            if self.isExecutingAction {
+                self.pendingCompletions.append { [weak self] in
+                    self?.getIdToken(forceRefresh: forceRefresh, getLoginToken: getLoginToken, completion: completion)
+                }
+                return
+            }
+
+            if !self.migrationCompleted, let currentToken = self.currentToken {
+                // CLAIM THE LOCK IMMEDIATELY
+                self.isExecutingAction = true
+                
+                self.performSilentExchange(oldIdToken: currentToken) { success in
+                    self.isolationQueue.async {
+                        if !success {
+                            self.isExecutingAction = false // Release lock
+                            self.clearState()
+                            completion(.failure(BNAppAuthError.oidcCallbackFailedWithUnknownError))
+                            self.processWaitingQueue()
+                            return
+                        }
+                        
+                        self.migrationCompleted = true
+
+                        self.performTokenRefresh(
+                            client: client,
+                            authState: authState,
+                            forceRefresh: forceRefresh,
+                            getLoginToken: getLoginToken
+                        ) { result in
+                            completion(result)
+                            self.isolationQueue.async {
+                                self.isExecutingAction = false
+                                self.processWaitingQueue()
+                            }
+                        }
+                    }
+                }
+                return
+            }
+            
+            self.performTokenRefresh(
+                client: client,
+                authState: authState,
+                forceRefresh: forceRefresh,
+                getLoginToken: getLoginToken,
+                completion: completion
+            )
         }
-        performTokenRefresh(
-            client: client,
-            authState: authState,
-            forceRefresh: forceRefresh,
-            getLoginToken: getLoginToken,
-            completion: completion
-        )
+    }
+
+    private func processWaitingQueue() {
+        isolationQueue.async { [weak self] in
+            guard let self = self else { return }
+            let waiting = self.pendingCompletions
+            self.pendingCompletions = []
+            waiting.forEach { $0() }
+        }
     }
     
     private func performTokenRefresh(
