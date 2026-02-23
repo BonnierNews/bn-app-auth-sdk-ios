@@ -256,8 +256,10 @@ public class BNAppAuth: NSObject {
                 }
                 return
             }
+            
+            let needsMigration = (client.useMigration == true) && !self.migrationCompleted
 
-            if !self.migrationCompleted, let currentToken = self.currentToken {
+            if needsMigration, let currentToken = self.currentToken {
                 // CLAIM THE LOCK IMMEDIATELY
                 self.isExecutingAction = true
                 

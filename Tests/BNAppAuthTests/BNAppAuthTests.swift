@@ -720,4 +720,34 @@ final class bn_app_authTests: XCTestCase {
         
         XCTAssertEqual(AuthorizationServiceMock.performInvokeCount, 1, "The 'Mutex' logic failed: Multiple migration requests were fired.")
     }
+    
+    func testGetIdToken_whenUseMigrationIsFalse_shouldNotPerformExchange() throws {
+        let disabledConfig = MockHelper.clientConfiguration(useMigration: false)
+        sut.configure(client: disabledConfig)
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        let authState = MockHelper.authStateMock()
+        authStorageMock._storedState = authState
+        let expectation = XCTestExpectation(description: "getIdToken should finish without migration")
+        
+        sut.getIdToken { result in
+            if case .success = result {
+            } else {
+                XCTFail("Should not fail")
+            }
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 2)
+        
+        XCTAssertEqual(
+            AuthorizationServiceMock.performInvokeCount,
+            0,
+            "Migration exchange should not have been triggered when useMigration is false"
+        )
+        
+        XCTAssertFalse(
+            userDefaultsMock.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue),
+            "Migration status should not have been updated"
+        )
+    }
 }

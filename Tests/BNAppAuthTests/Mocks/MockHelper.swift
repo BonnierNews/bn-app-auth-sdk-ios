@@ -43,14 +43,18 @@ enum MockHelper {
         return state
     }
     
-    static func clientConfiguration(customScopes: Array<String>? = nil) -> BNAppAuth.ClientConfiguration {
+    static func clientConfiguration(
+        customScopes: Array<String>? = nil,
+        useMigration: Bool = true
+    ) -> BNAppAuth.ClientConfiguration {
         BNAppAuth.ClientConfiguration(
             issuer: URL(string: "https://oidc-server-url")!,
             clientId: "client-id",
             clientSecret: nil,
             loginRedirectURL: URL(string: "login-callback-url")!,
             logoutRedirectUrl: URL(string: "logout-callback-url")!,
-            customScopes: customScopes
+            customScopes: customScopes,
+            useMigration: useMigration
         )
     }
 }

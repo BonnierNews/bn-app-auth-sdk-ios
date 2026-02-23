@@ -242,33 +242,33 @@ class TableViewController: UITableViewController {
             return
         }
         UserDefaults.standard.set(false, forKey: "BnMigrationCompleted")
-        BNAppAuth.shared.getIdToken(getLoginToken: true) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let tokenResponse):
-                    self?.update()
-                    self?.showToast(message: "Token exchange uppdaterad")
-                case .failure(let error):
-                    self?.showToast(message: "Token exchange misslyckades")
-                    self?.update()
-                    print("Refresh error: \(error)")
-                }
-            }
-        }
-        
-//        // Stress test
-//        for i in 1...10 {
-//            print("➡️ Dispatching call #\(i)")
-//            
-//            BNAppAuth.shared.getIdToken(getLoginToken: true) { result in
+//        BNAppAuth.shared.getIdToken(getLoginToken: true) { [weak self] result in
+//            DispatchQueue.main.async {
 //                switch result {
-//                case .success(let response):
-//                    print("✅ Call #\(i) Success: \(response?.idToken.prefix(10) ?? "no-token")...")
+//                case .success(let tokenResponse):
+//                    self?.update()
+//                    self?.showToast(message: "Token exchange uppdaterad")
 //                case .failure(let error):
-//                    print("❌ Call #\(i) Failed: \(error.localizedDescription)")
+//                    self?.showToast(message: "Token exchange misslyckades")
+//                    self?.update()
+//                    print("Refresh error: \(error)")
 //                }
 //            }
 //        }
+        
+        // Stress test
+        for i in 1...10 {
+            print("➡️ Dispatching call #\(i)")
+            
+            BNAppAuth.shared.getIdToken(getLoginToken: true) { result in
+                switch result {
+                case .success(let response):
+                    print("✅ Call #\(i) Success: \(response?.idToken.prefix(10) ?? "no-token")...")
+                case .failure(let error):
+                    print("❌ Call #\(i) Failed: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     private func update() {
