@@ -11,6 +11,7 @@ extension BNAppAuth {
         let useCustomBrowser: Bool
         let customScopes: Array<String>?
         let isDebuggable: Bool
+        let useMigration: Bool
         
         public init(
             issuer: URL,
@@ -21,7 +22,8 @@ extension BNAppAuth {
             logoutRedirectUrl: URL,
             useCustomBrowser: Bool = false,
             customScopes: Array<String>? = nil,
-            isDebuggable: Bool = false
+            isDebuggable: Bool = false,
+            useMigration: Bool = false
         ) {
             self.issuer = issuer
             self.clientId = clientId
@@ -32,6 +34,7 @@ extension BNAppAuth {
             self.useCustomBrowser = useCustomBrowser
             self.customScopes = customScopes
             self.isDebuggable = isDebuggable
+            self.useMigration = useMigration
         }
     }
 }

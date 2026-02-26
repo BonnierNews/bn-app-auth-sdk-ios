@@ -21,6 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             loginRedirectURL: URL(string: "custom.redirect.scheme://www.test.se/login")!,
             logoutRedirectUrl: URL(string: "custom.redirect.scheme://www.test.se/logout")!
         )
+    
+        UserDefaults.standard.set(true, forKey: "BnMigrationCompleted")
         BNAppAuth.shared.configure(client: client)
         
         BNAppAuth.shared.addOnStateChangeListener({ isAuthorized in
