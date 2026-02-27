@@ -23,6 +23,7 @@ let client = BNAppAuth.ClientConfiguration(
     logoutRedirectUrl: URL(string: "logout-callback-url")!,
     isDebuggable: true, // Enable for debugging
     customScopes: ["custom-scope"], // Optional
+    useMigration: false, // Defaults to false, set to true to migrate uses from issuer /oidc to /oauth
 )
 BNAppAuth.shared.configure(client: client)
 ```
@@ -69,11 +70,12 @@ Continues the authorization flow by processing the URL passed from the external 
   - `true` if the flow was successfully continued, `false` otherwise.
 
 ```
-getIdToken(forceRefresh: Bool = false, completion: @escaping (Result<TokenResponse?,Error>) -> Void)
+getIdToken(forceRefresh: Bool = false, getLoginToken: Bool = false, completion: @escaping (Result<TokenResponse?,Error>) -> Void)
 ```
-Fetches the ID token, optionally forcing a refresh.
+Fetches the ID token, optionally forcing a refresh or requesting a login token.
 - **Parameters**:
   - `forceRefresh` (Bool): Whether to force a refresh of the token.
+  - `getLoginToken` (Bool): Whether to request a login token (magic link token) in the response.
   - `completion` (Closure): Callback executed with the token response or an error.
 
 ```
@@ -90,12 +92,12 @@ Adds a listener to be notified whenever the authentication state changes.
   
 
 ## Exampleapp
-The exampleapp in the main module is a sample application demonstrating how to use the BNAppAuth library for authentication in an Android project. It includes examples of configuring the library, initiating login and logout processes, and handling authentication tokens.
-1. Configuration: Setting up the BNAppAuth instance with the necessary client configuration.
-2. Login: Initiating the login process and handling the result.
-3. Logout: Initiating the logout process.
-4. Token Management: Retrieving and refreshing ID tokens.
-5. State Management: Storing and clearing authentication state.
+The exampleapp in `BNAppAuthExampleApp/` is a sample iOS application demonstrating how to use the BNAppAuth library. It includes examples of configuring the library, initiating login and logout processes, and handling authentication tokens.
+1. **Configuration**: Setting up the BNAppAuth instance with the necessary client configuration.
+2. **Login/Logout**: Initiating the login and logout processes and handling the result.
+3. **Force Refresh**: Forcing a token refresh via `getIdToken(forceRefresh: true)`.
+4. **Get Login Token**: Fetching a magic link login token via `getIdToken(getLoginToken: true)`.
+5. **Exchange Token / Test Migration**: Resets the `BnMigrationCompleted` flag in UserDefaults, allowing you to re-trigger the migration flow. Use this button to test that the migration from `/oidc` to `/oauth` works correctly without needing to reinstall the app.
 
 ## License
 MIT License
