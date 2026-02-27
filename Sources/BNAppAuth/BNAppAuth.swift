@@ -21,12 +21,14 @@ public class BNAppAuth: NSObject {
     private var isExecutingAction = false
     private var pendingCompletions: [() -> Void] = []
     
-    private var migrationCompleted: Bool {
+    private var needsMigration: Bool {
         get {
-            userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+            guard client?.useMigration == true else { return false }
+            let isCompleted = userDefaults.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+            return !isCompleted
         }
         set {
-            userDefaults.set(newValue, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+            userDefaults.set(!newValue, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
         }
     }
     
@@ -96,7 +98,7 @@ public class BNAppAuth: NSObject {
             completion?(.failure(BNAppAuthError.clientNotConfigured))
             return
         }
-        
+        needsMigration = false
         let clientId = client.clientId
         let clientSecret = client.clientSecret
         let clientLoginRedirectUrl = client.loginRedirectURL
@@ -257,9 +259,7 @@ public class BNAppAuth: NSObject {
                 return
             }
             
-            let needsMigration = (client.useMigration == true) && !self.migrationCompleted
-
-            if needsMigration, let currentToken = self.currentToken {
+            if self.needsMigration, let currentToken = self.currentToken {
                 // CLAIM THE LOCK IMMEDIATELY
                 self.isExecutingAction = true
                 
@@ -273,7 +273,7 @@ public class BNAppAuth: NSObject {
                             return
                         }
                         
-                        self.migrationCompleted = true
+                        self.needsMigration = false
 
                         self.performTokenRefresh(
                             client: client,
