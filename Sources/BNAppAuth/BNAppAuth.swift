@@ -98,7 +98,9 @@ public class BNAppAuth: NSObject {
             completion?(.failure(BNAppAuthError.clientNotConfigured))
             return
         }
-        needsMigration = false
+        if client.useMigration {
+            needsMigration = false
+        }
         let clientId = client.clientId
         let clientSecret = client.clientSecret
         let clientLoginRedirectUrl = client.loginRedirectURL
