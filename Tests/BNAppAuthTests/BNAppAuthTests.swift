@@ -629,7 +629,7 @@ final class bn_app_authTests: XCTestCase {
         userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
 
         let mockState = MockHelper.authStateMock()
-        mockState.performActionIdTokenReturnValue = "final-token"
+        mockState.performActionIdTokenReturnValue = "old-token-before-exchange"
         authStorageMock._storedState = mockState
 
         let exchangedTokenResponseMock = TokenResponseMock(
