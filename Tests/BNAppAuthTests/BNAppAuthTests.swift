@@ -122,9 +122,9 @@ final class bn_app_authTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Call getIdToken() with completion")
         userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
         authState.performActionIdTokenReturnValue = "newIdToken"
-        authServiceMock.performReturnValue = TokenResponseMock(
+        let exchangedTokenResponseMock = TokenResponseMock(
             request: OIDTokenRequest(
-                configuration: AuthorizationServiceMock.configurationReturnValue,
+                configuration: authServiceMock.configurationReturnValue,
                 grantType: "exchange-token",
                 authorizationCode: nil,
                 redirectURL: nil,
@@ -135,8 +135,10 @@ final class bn_app_authTests: XCTestCase {
                 codeVerifier: nil,
                 additionalParameters: nil
             ),
-            parameters: [:]
+            parameters: ["id_token": "exchanged-id-token" as NSString, "refresh_token": "new-refresh-token" as NSString]
         )
+        exchangedTokenResponseMock.idTokenReturnValue = "exchanged-id-token"
+        authServiceMock.performReturnValue = exchangedTokenResponseMock
         
         sut.getIdToken() { result in
             switch result {
@@ -630,7 +632,7 @@ final class bn_app_authTests: XCTestCase {
         mockState.performActionIdTokenReturnValue = "final-token"
         authStorageMock._storedState = mockState
 
-        authServiceMock.performReturnValue = TokenResponseMock(
+        let exchangedTokenResponseMock = TokenResponseMock(
             request: OIDTokenRequest(
                 configuration: AuthorizationServiceMock.configurationReturnValue,
                 grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
@@ -643,8 +645,10 @@ final class bn_app_authTests: XCTestCase {
                 codeVerifier: nil,
                 additionalParameters: nil
             ),
-            parameters: ["id_token": "migrated-token" as NSString]
+            parameters: ["id_token": "migrated-token" as NSString, "refresh_token": "new-refresh-token" as NSString]
         )
+        exchangedTokenResponseMock.idTokenReturnValue = "final-token"
+        authServiceMock.performReturnValue = exchangedTokenResponseMock
 
         let expectation = XCTestExpectation(description: "Migration should complete")
 
