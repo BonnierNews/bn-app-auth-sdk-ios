@@ -267,7 +267,7 @@ public class BNAppAuth: NSObject {
                 
                 self.performSilentExchange(oldIdToken: currentToken) { success in
                     self.isolationQueue.async {
-                        if !success {
+                        guard success, let newAuthState = self.authState else {
                             self.isExecutingAction = false // Release lock
                             self.clearState()
                             completion(.failure(BNAppAuthError.oidcCallbackFailedWithUnknownError))
@@ -279,7 +279,7 @@ public class BNAppAuth: NSObject {
 
                         self.performTokenRefresh(
                             client: client,
-                            authState: authState,
+                            authState: newAuthState,
                             forceRefresh: forceRefresh,
                             getLoginToken: getLoginToken
                         ) { result in
