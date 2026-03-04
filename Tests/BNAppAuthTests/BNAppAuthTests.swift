@@ -750,4 +750,121 @@ final class bn_app_authTests: XCTestCase {
             "Migration status should not have been updated"
         )
     }
+    
+    func testGetIdToken_afterTokenExchange_shouldUseNewAuthStateForTokenRefresh() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        
+        // Create the initial auth state with old token
+        let oldAuthState = MockHelper.authStateMock()
+        oldAuthState.tokenResponseIdTokenReturnValue = "old-id-token"
+        authStorageMock._storedState = oldAuthState
+        
+        // Mock the token exchange response with a new token
+        let exchangedTokenResponseMock = TokenResponseMock(
+            request: OIDTokenRequest(
+                configuration: authServiceMock.configurationReturnValue,
+                grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: "clientId",
+                clientSecret: nil,
+                scopes: ["openid"],
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: nil
+            ),
+            parameters: ["id_token": "exchanged-id-token" as NSString, "refresh_token": "new-refresh-token" as NSString]
+        )
+        exchangedTokenResponseMock.idTokenReturnValue = "exchanged-id-token"
+        authServiceMock.performReturnValue = exchangedTokenResponseMock
+        
+        let expectation = XCTestExpectation(description: "Token exchange should create new auth state")
+        
+        sut.getIdToken { result in
+            if case .success(let tokenResult) = result {
+                XCTAssertNotNil(tokenResult, "Token result should not be nil")
+                
+                // Verify that the final token is from the NEW auth state, not the old one
+                XCTAssertNotEqual(tokenResult?.idToken, "old-id-token", "Should not be using the old token")
+                
+                // Verify that the auth storage has been updated with the new auth state
+                XCTAssertTrue(self.authStorageMock.storeInvokeCount >= 1, "Auth storage should have been updated with new state")
+                
+                // Verify that the migration was marked as completed
+                XCTAssertTrue(
+                    self.userDefaultsMock.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue),
+                    "Migration should be marked as completed after successful exchange"
+                )
+                
+                // Verify that the token exchange was performed exactly once
+                XCTAssertEqual(
+                    self.authServiceMock.performInvokeCount,
+                    1,
+                    "Token exchange should have been performed exactly once"
+                )
+            } else {
+                XCTFail("Token exchange should succeed")
+            }
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 2)
+    }
+    
+    func testGetIdToken_afterTokenExchange_newAuthStateShouldReceivePerformAction() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
+        
+        // Track the old auth state to verify it's not used after exchange
+        let oldAuthState = MockHelper.authStateMock()
+        oldAuthState.tokenResponseIdTokenReturnValue = "old-id-token"
+        oldAuthState.performActionIdTokenReturnValue = "old-refreshed-token"
+        
+        let oldPerformActionCount = oldAuthState.performActionInvokeCount
+        authStorageMock._storedState = oldAuthState
+        
+        // Mock the token exchange response
+        let exchangedTokenResponseMock = TokenResponseMock(
+            request: OIDTokenRequest(
+                configuration: authServiceMock.configurationReturnValue,
+                grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+                authorizationCode: nil,
+                redirectURL: nil,
+                clientID: "clientId",
+                clientSecret: nil,
+                scopes: ["openid"],
+                refreshToken: nil,
+                codeVerifier: nil,
+                additionalParameters: nil
+            ),
+            parameters: ["id_token": "exchanged-id-token" as NSString, "refresh_token": "new-refresh-token" as NSString]
+        )
+        exchangedTokenResponseMock.idTokenReturnValue = "exchanged-id-token"
+        authServiceMock.performReturnValue = exchangedTokenResponseMock
+        
+        let expectation = XCTestExpectation(description: "New auth state should be used for performAction")
+        
+        sut.getIdToken { result in
+            if case .success(let tokenResult) = result {
+                // Verify that performAction was called on the NEW auth state created after exchange
+                // The old auth state's performActionInvokeCount should not have increased
+                XCTAssertEqual(
+                    oldAuthState.performActionInvokeCount,
+                    oldPerformActionCount,
+                    "Old auth state should not have performAction called on it"
+                )
+                
+                // The stored state should be a new instance (not the old one)
+                XCTAssertTrue(self.sut.isAuthorized, "Should be authorized with new state")
+                
+                XCTAssertNotNil(tokenResult, "Should have a token result")
+            } else {
+                XCTFail("Token exchange should succeed")
+            }
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 2)
+    }
 }
