@@ -477,7 +477,9 @@ public class BNAppAuth: NSObject {
                     authorizationResponse: authResponse,
                     tokenResponse: tokenResponse
                 )
+                
                 self.setAuthState(ordinaryState)
+                authState?.update(with: tokenResponse, error: nil)
                 completion(.success(self.currentToken))
             }
         }
