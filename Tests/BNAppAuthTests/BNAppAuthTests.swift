@@ -242,7 +242,7 @@ final class bn_app_authTests: XCTestCase {
         wait(for: [expectation])
     }
     
-    func testGetIdToken_whenPerformActionReturnsNetworkError_shouldReturnSuccess() throws {
+    func testGetIdToken_whenPerformActionReturnsNetworkError_shouldReturnError() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         let authState = MockHelper.authStateMock()
         authState.performActionErrorReturnValue = NSError(domain: "idToken", code: -5)
@@ -252,10 +252,10 @@ final class bn_app_authTests: XCTestCase {
 
         sut.getIdToken() { result in
             switch result {
-            case .success(let idToken):
-                XCTAssertNotNil(idToken)
-            case .failure:
-                XCTFail("Should not produce error")
+            case .success:
+                XCTFail("Should not produce success — all errors propagate (matches Android)")
+            case .failure(let error):
+                XCTAssertNotNil(error)
             }
             expectation.fulfill()
         }
@@ -678,7 +678,9 @@ final class bn_app_authTests: XCTestCase {
         sut.getIdToken { result in
             if case .failure = result {
                 XCTAssertFalse(self.sut.isAuthorized)
-                XCTAssertFalse(self.userDefaultsMock.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue))
+                // Migration flag is set BEFORE the exchange attempt (matches Android) so it stays
+                // true even on failure — preventing infinite retry loops across app restarts.
+                XCTAssertTrue(self.userDefaultsMock.bool(forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue))
             } else {
                 XCTFail("Should have failed due to mock error")
             }
@@ -687,7 +689,7 @@ final class bn_app_authTests: XCTestCase {
 
         wait(for: [expectation], timeout: 2)
     }
-    
+
     func testGetIdToken_multipleConcurrentCalls_shouldOnlyPerformOneMigration() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)
