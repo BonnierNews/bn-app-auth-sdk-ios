@@ -287,6 +287,21 @@ public class BNAppAuth: NSObject {
                 return
             }
 
+            // Early return — same as Android lines 252–263:
+            // If the token is still fresh, return it directly from our own state without
+            // asking AppAuth to perform a (potentially network) refresh.
+            if !forceRefresh && !getLoginToken && self.isAuthorized && !self.tokenNeedsRefresh(currentAuthState) {
+                let params = currentAuthState.lastTokenResponse?.additionalParameters
+                let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
+                    ? (params?["old_bnidtoken"] as? String)
+                    : nil
+                let loginToken = params?["login_token"] as? String
+                if let idToken = self.currentToken {
+                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: false, loginToken: loginToken)))
+                    return
+                }
+            }
+
             if !self.isAuthorized {
                 completion(.success(nil))
                 return
@@ -305,6 +320,15 @@ public class BNAppAuth: NSObject {
             }
             sema.wait()
         }
+    }
+
+    // Mirrors Android's `authState?.needsTokenRefresh == false` check.
+    // AppAuth-iOS uses the same 60-second tolerance internally (kExpiryTimeTolerance = 60).
+    private func tokenNeedsRefresh(_ authState: OIDAuthState) -> Bool {
+        guard let expirationDate = authState.lastTokenResponse?.accessTokenExpirationDate else {
+            return true
+        }
+        return expirationDate.timeIntervalSinceNow <= 60
     }
 
     // Synchronous wrapper for exchangeIdToken — blocks the calling thread via semaphore
