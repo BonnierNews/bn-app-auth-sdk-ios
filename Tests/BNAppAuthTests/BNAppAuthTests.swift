@@ -624,6 +624,36 @@ final class bn_app_authTests: XCTestCase {
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
     
+    func testGetIdToken_withForceRefresh_shouldSetBypassCacheParameter() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        let authState = MockHelper.authStateMock()
+        authStorageMock._storedState = authState
+        let expectation = XCTestExpectation(description: "Call getIdToken(forceRefresh: true) with completion")
+
+        sut.getIdToken(forceRefresh: true) { _ in
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation])
+
+        XCTAssertEqual(authState.performActionLastAdditionalParameters?["bypass_cache"], "true")
+    }
+
+    func testGetIdToken_withoutForceRefresh_shouldNotSetBypassCacheParameter() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        let authState = MockHelper.authStateMock()
+        authStorageMock._storedState = authState
+        let expectation = XCTestExpectation(description: "Call getIdToken() with completion")
+
+        sut.getIdToken() { _ in
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation])
+
+        XCTAssertNil(authState.performActionLastAdditionalParameters?["bypass_cache"])
+    }
+
     func testGetIdToken_whenMigrationRequired_shouldPerformExchangeAndReturnToken() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         userDefaultsMock.set(false, forKey: UserDefaultsKeys.BnMigrationCompleted.rawValue)

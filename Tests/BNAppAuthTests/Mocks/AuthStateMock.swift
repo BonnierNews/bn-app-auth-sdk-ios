@@ -73,8 +73,10 @@ class AuthStateMock: OIDAuthState {
     var performActionErrorReturnValue: NSError? = nil
     var performActionWasCalledTimes: ((Int) -> Void)?
     var performActionInvokeCount = 0
+    var performActionLastAdditionalParameters: [String: String]?
     override func performAction(freshTokens action: @escaping OIDAuthStateAction, additionalRefreshParameters additionalParameters: [String : String]?) {
         performActionInvokeCount += 1
+        performActionLastAdditionalParameters = additionalParameters
         performActionWasCalledTimes?(performActionInvokeCount)
 
         action(nil,performActionIdTokenReturnValue,performActionErrorReturnValue)

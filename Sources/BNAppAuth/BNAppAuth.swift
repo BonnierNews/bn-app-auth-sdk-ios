@@ -325,6 +325,9 @@ public class BNAppAuth: NSObject {
         if forceRefresh || getLoginToken {
             authState.setNeedsTokenRefresh()
         }
+        if forceRefresh {
+            refreshParams["bypass_cache"] = "true"
+        }
         if getLoginToken {
             refreshParams["issue_login_token"] = "true"
         }
