@@ -189,7 +189,7 @@ public class BNAppAuth: NSObject {
 
             let logoutRequest = OIDEndSessionRequest(
                 configuration: configuration,
-                idTokenHint: "",
+                idTokenHint: self?.authState?.lastTokenResponse?.idToken ?? "",
                 postLogoutRedirectURL: clientLogoutRedirectUrl,
                 additionalParameters: [
                     "client_id": clientId
