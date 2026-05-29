@@ -83,14 +83,15 @@ public class BNAppAuth: NSObject {
         authState?.isAuthorized == true
     }
 
-    public func createAccount(locale: String? = nil, completion: ((Result<Void,Error>) -> Void)?) {
-        login(action: "create-user", locale: locale, completion: completion)
+    public func createAccount(locale: String? = nil, consent: String? = nil, completion: ((Result<Void,Error>) -> Void)?) {
+        login(action: "create-user", locale: locale, consent: consent, completion: completion)
     }
 
     public func login(
         token: String? = nil,
         action: String? = nil,
         locale: String? = nil,
+        consent: String? = nil,
         completion: ((Result<Void,Error>) -> Void)?)
     {
         guard let client, let delegate else {
@@ -128,6 +129,10 @@ public class BNAppAuth: NSObject {
 
             if let locale {
                 additionalParameters["ui_locales"] = locale
+            }
+
+            if let consent {
+                additionalParameters["consent"] = consent
             }
 
             let request = OIDAuthorizationRequest(
