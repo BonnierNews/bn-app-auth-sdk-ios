@@ -583,7 +583,54 @@ final class bn_app_authTests: XCTestCase {
         sut.createAccount(locale: "sv-SE") { result in
             XCTFail("Should not get here")
         }
-        
+
+        wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
+    }
+
+    func testLogin_withConsentSet_shouldHaveIncludedParameterInRequest() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        sut.delegate = delegateMock
+
+        let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
+
+        authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
+            if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
+                XCTAssert(request.additionalParameters?["consent"] == "consent-string")
+            } else {
+                XCTFail("Should not get here")
+            }
+
+            defaultAuthorizationFlowExpectation.fulfill()
+        }
+
+        sut.login(consent: "consent-string") { result in
+            XCTFail("Should not get here")
+        }
+
+        wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
+    }
+
+    func testCreateAccount_withConsentSet_shouldHaveIncludedParameterInRequest() throws {
+        sut.configure(client: MockHelper.clientConfiguration())
+        sut.delegate = delegateMock
+
+        let defaultAuthorizationFlowExpectation = XCTestExpectation(description: "Call to AuthorizationFlowBuilder for defaultAuthorizationFlow was made")
+
+        authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
+            if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
+                XCTAssert(request.additionalParameters?["consent"] == "consent-string")
+                XCTAssert(request.additionalParameters?["action"] == "create-user")
+            } else {
+                XCTFail("Should not get here")
+            }
+
+            defaultAuthorizationFlowExpectation.fulfill()
+        }
+
+        sut.createAccount(consent: "consent-string") { result in
+            XCTFail("Should not get here")
+        }
+
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
 
