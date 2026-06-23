@@ -587,7 +587,7 @@ final class bn_app_authTests: XCTestCase {
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
 
-    func testLogin_withConsentSet_shouldHaveIncludedParameterInRequest() throws {
+    func testLogin_withConsentIdSet_shouldHaveIncludedParameterInRequest() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         sut.delegate = delegateMock
 
@@ -595,7 +595,7 @@ final class bn_app_authTests: XCTestCase {
 
         authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
             if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
-                XCTAssert(request.additionalParameters?["consent"] == "consent-string")
+                XCTAssert(request.additionalParameters?["consent_id"] == "consent-id-string")
             } else {
                 XCTFail("Should not get here")
             }
@@ -603,14 +603,14 @@ final class bn_app_authTests: XCTestCase {
             defaultAuthorizationFlowExpectation.fulfill()
         }
 
-        sut.login(consent: "consent-string") { result in
+        sut.login(consentId: "consent-id-string") { result in
             XCTFail("Should not get here")
         }
 
         wait(for: [defaultAuthorizationFlowExpectation], timeout: 2)
     }
 
-    func testCreateAccount_withConsentSet_shouldHaveIncludedParameterInRequest() throws {
+    func testCreateAccount_withConsentIdSet_shouldHaveIncludedParameterInRequest() throws {
         sut.configure(client: MockHelper.clientConfiguration())
         sut.delegate = delegateMock
 
@@ -618,7 +618,7 @@ final class bn_app_authTests: XCTestCase {
 
         authFlowBuilderMock.defaultAuthorizationFlowWasCalledTimes = { [weak self] _ in
             if let request = self?.authFlowBuilderMock.defaultAuthorizationFlowLastRequest {
-                XCTAssert(request.additionalParameters?["consent"] == "consent-string")
+                XCTAssert(request.additionalParameters?["consent_id"] == "consent-id-string")
                 XCTAssert(request.additionalParameters?["action"] == "create-user")
             } else {
                 XCTFail("Should not get here")
@@ -627,7 +627,7 @@ final class bn_app_authTests: XCTestCase {
             defaultAuthorizationFlowExpectation.fulfill()
         }
 
-        sut.createAccount(consent: "consent-string") { result in
+        sut.createAccount(consentId: "consent-id-string") { result in
             XCTFail("Should not get here")
         }
 
