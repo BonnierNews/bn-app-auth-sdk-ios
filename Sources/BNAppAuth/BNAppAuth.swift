@@ -77,6 +77,10 @@ public class BNAppAuth: NSObject {
 
     public func configure(client: ClientConfiguration) {
         self.client = client
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 5
+        sessionConfig.timeoutIntervalForResource = 5
+        OIDURLSessionProvider.setSession(URLSession(configuration: sessionConfig))
     }
 
     public var isAuthorized: Bool {
