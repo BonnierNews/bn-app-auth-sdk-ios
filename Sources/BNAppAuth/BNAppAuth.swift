@@ -304,9 +304,9 @@ public class BNAppAuth: NSObject {
                 let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
                     ? (params?["old_bnidtoken"] as? String)
                     : nil
-                let loginToken = params?["login_token"] as? String
+                // getLoginToken is false in this branch; never echo back a cached login_token.
                 if let idToken = self.currentToken {
-                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: false, loginToken: loginToken)))
+                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: false, loginToken: nil)))
                     return
                 }
             }
