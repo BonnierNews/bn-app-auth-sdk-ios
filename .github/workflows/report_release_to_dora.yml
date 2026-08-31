@@ -1,0 +1,28 @@
+name: REPORT_RELEASE_TO_DORA
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Report release to DORA
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          dora_json=$(jq -c -n --arg commit_sha "$commit_sha" \
+            '{ "service":"bn-app-auth-sdk-ios", "team":"exp-app", "gitHash":$commit_sha, "environment":"prod", "platform":"ios", "gitOrg":"bonniernews", "gitRepo":"bn-app-auth-sdk-ios" }')
+          curl --request POST --max-time 10 --silent --show-error --fail --output /dev/null \
+            --header 'Content-Type: application/json' \
+            --data "$dora_json" \
+            https://europe-west1-developer-kpis-prod-0u49.cloudfunctions.net/deploy-recorder \
+            || echo "Warning: failed to report release to DORA"
