@@ -69,6 +69,7 @@ class AuthStateMock: OIDAuthState {
         setNeedsTokenRefreshWasCalledTimes?(setNeedsTokenRefreshInvokeCount)
     }
 
+    var performActionAccessTokenReturnValue: String?
     var performActionIdTokenReturnValue: String? = "tokenId"
     var performActionErrorReturnValue: NSError? = nil
     var performActionWasCalledTimes: ((Int) -> Void)?
@@ -79,7 +80,7 @@ class AuthStateMock: OIDAuthState {
         performActionLastAdditionalParameters = additionalParameters
         performActionWasCalledTimes?(performActionInvokeCount)
 
-        action(nil,performActionIdTokenReturnValue,performActionErrorReturnValue)
+        action(performActionAccessTokenReturnValue,performActionIdTokenReturnValue,performActionErrorReturnValue)
 
     }
 }

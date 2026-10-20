@@ -8,18 +8,26 @@
 import UIKit
 import BNAppAuth
 
+// Dummy values: fill in a site and a client id that id-service issues transfer tokens for.
+enum TransferTokenTest {
+    static let resource = URL(string: "https://www.example.com/")!
+    static let audience = "site-client-id"
+}
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Dummy values: fill in a real issuer, client and redirect URLs to run the example app, but don't commit them.
         let client = BNAppAuth.ClientConfiguration(
             issuer: URL(string: "https://oidc-provider.com/")!,
             clientId: "client-id",
             clientSecret: nil,
             loginRedirectURL: URL(string: "custom.redirect.scheme://www.test.se/login")!,
-            logoutRedirectUrl: URL(string: "custom.redirect.scheme://www.test.se/logout")!
+            logoutRedirectUrl: URL(string: "custom.redirect.scheme://www.test.se/logout")!,
+            customScopes: ["profile", "offline_access", "entitlements", "external_ids", "email", "old_bnidtoken"]
         )
     
         UserDefaults.standard.set(true, forKey: "BnMigrationCompleted")
