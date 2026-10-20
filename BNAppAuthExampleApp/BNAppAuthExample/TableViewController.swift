@@ -308,13 +308,13 @@ class TableViewController: UITableViewController {
 
     @objc private func transferTokenResourcePressed() {
         showTransferToken(key: "transfer token (resource)") {
-            try await BNAppAuth.shared.getTransferToken(resource: TransferTokenTest.resource)
+            try await BNAppAuth.shared.getTransferToken(resource: ExampleConfig.transferTokenResource)
         }
     }
 
     @objc private func transferTokenAudiencePressed() {
         showTransferToken(key: "transfer token (audience)") {
-            try await BNAppAuth.shared.getTransferToken(audience: TransferTokenTest.audience)
+            try await BNAppAuth.shared.getTransferToken(audience: ExampleConfig.transferTokenAudience)
         }
     }
 

@@ -175,7 +175,7 @@ With `useMigration: true`, the first `getIdToken` call after an update exchanges
 5. **Exchange token / test migration**: resets the `BnMigrationCompleted` flag in `UserDefaults`, so the migration from `/oidc` to `/oauth` runs again without reinstalling the app.
 6. **Transfer token (resource / audience)**: calls `getTransferToken(resource:)` or `getTransferToken(audience:)` and shows the token, "No token" or the error.
 
-`AppDelegate.swift` holds dummy values for the client configuration and for the site and client id the transfer token buttons use. Fill in real ones to run the app, but don't commit them.
+The client configuration and the site and client id the transfer token buttons use come from `BNAppAuthExample/Example.xcconfig`, which holds dummy values. To run the app against a real environment, copy `BNAppAuthExample/.env.xcconfig.sample` to `.env.xcconfig` in the same folder and fill in your values. The file is git-ignored, so it never gets committed. In xcconfig files `//` starts a comment, so write urls with `:/$()/` instead of `://`.
 
 ## License
 

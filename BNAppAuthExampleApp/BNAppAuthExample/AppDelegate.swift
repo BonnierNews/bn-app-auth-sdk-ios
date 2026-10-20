@@ -8,10 +8,22 @@
 import UIKit
 import BNAppAuth
 
-// Dummy values: fill in a site and a client id that id-service issues transfer tokens for.
-enum TransferTokenTest {
-    static let resource = URL(string: "https://www.example.com/")!
-    static let audience = "site-client-id"
+// The values come from Example.xcconfig and your git-ignored .env.xcconfig, through Info.plist.
+enum ExampleConfig {
+    static let issuer = url("EXAMPLE_ISSUER")
+    static let clientId = value("EXAMPLE_CLIENT_ID")
+    static let loginRedirectURL = url("EXAMPLE_LOGIN_REDIRECT_URL")
+    static let logoutRedirectURL = url("EXAMPLE_LOGOUT_REDIRECT_URL")
+    static let transferTokenResource = url("EXAMPLE_TRANSFER_TOKEN_RESOURCE")
+    static let transferTokenAudience = value("EXAMPLE_TRANSFER_TOKEN_AUDIENCE")
+
+    private static func value(_ key: String) -> String {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? ""
+    }
+
+    private static func url(_ key: String) -> URL {
+        URL(string: value(key))!
+    }
 }
 
 @main
@@ -20,13 +32,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Dummy values: fill in a real issuer, client and redirect URLs to run the example app, but don't commit them.
         let client = BNAppAuth.ClientConfiguration(
-            issuer: URL(string: "https://oidc-provider.com/")!,
-            clientId: "client-id",
+            issuer: ExampleConfig.issuer,
+            clientId: ExampleConfig.clientId,
             clientSecret: nil,
-            loginRedirectURL: URL(string: "custom.redirect.scheme://www.test.se/login")!,
-            logoutRedirectUrl: URL(string: "custom.redirect.scheme://www.test.se/logout")!,
+            loginRedirectURL: ExampleConfig.loginRedirectURL,
+            logoutRedirectUrl: ExampleConfig.logoutRedirectURL,
             customScopes: ["profile", "offline_access", "entitlements", "external_ids", "email", "old_bnidtoken"]
         )
     
