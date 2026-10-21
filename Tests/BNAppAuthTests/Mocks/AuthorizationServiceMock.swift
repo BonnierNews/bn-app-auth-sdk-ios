@@ -6,8 +6,10 @@ class AuthorizationServiceMock: TestableOIDAuthorizationService {
     static var performErrorReturnValue: Error?
     static var performReturnValue: OIDTokenResponse?
     static var performWasCalled: (() -> Void)?
+    static var performLastRequest: OIDTokenRequest?
     static func perform(_ request: OIDTokenRequest, callback: @escaping OIDTokenCallback) {
         performInvokeCount += 1
+        performLastRequest = request
         if let performErrorReturnValue {
             callback(nil, performErrorReturnValue)
         } else {
@@ -44,5 +46,6 @@ class AuthorizationServiceMock: TestableOIDAuthorizationService {
         Self.performWasCalled = nil
         Self.performErrorReturnValue = nil
         Self.performReturnValue = nil
+        Self.performLastRequest = nil
     }
 }
