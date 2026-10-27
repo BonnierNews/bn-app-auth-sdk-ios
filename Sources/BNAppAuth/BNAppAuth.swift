@@ -22,7 +22,7 @@ public class BNAppAuth: NSObject {
     private let tokenMutex = NSLock()
     private var isMigrationDone = false
 
-    private lazy var transferTokenExchange = TransferTokenExchange(
+    @MainActor private lazy var transferTokenExchange = TransferTokenExchange(
         client: { [weak self] in self?.client },
         freshAccessToken: { [weak self] in try await self?.freshAccessToken() },
         serviceConfiguration: { [weak self] in
@@ -319,8 +319,10 @@ public class BNAppAuth: NSObject {
                 let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
                     ? (params?["old_bnidtoken"] as? String)
                     : nil
-                if let idToken = self.currentToken {
-                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: false, loginToken: nil)))
+                if let idToken = currentAuthState.lastTokenResponse?.idToken ?? self.currentToken {
+                    let isUpdated = idToken != self.currentToken
+                    self.currentToken = idToken
+                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: isUpdated, loginToken: nil)))
                     return
                 }
             }
@@ -527,10 +529,12 @@ public class BNAppAuth: NSObject {
     /// site at `resource`, the https url the app is about to open. Returns nil when no token can be issued right
     /// now: the user is logged out, id-service has no client for the site, or id-service is too slow. Throws when
     /// the exchange fails.
+    @MainActor
     public func getTransferToken(resource: URL) async throws -> String? {
         try await logTransferTokenFailure { try await self.transferTokenExchange.transferToken(resource: resource) }
     }
 
+    @MainActor
     private func logTransferTokenFailure(_ transferToken: () async throws -> String?) async throws -> String? {
         do {
             return try await transferToken()
@@ -565,7 +569,9 @@ public class BNAppAuth: NSObject {
             let sema = DispatchSemaphore(value: 0)
             authState.performAction(
                 freshTokens: { accessToken, _, error in
-                    if let error {
+                    if self.authState !== authState {
+                        completion(.success(nil))
+                    } else if let error {
                         completion(.failure(error))
                     } else {
                         completion(.success(accessToken))
@@ -623,6 +629,7 @@ public class BNAppAuth: NSObject {
 
 extension BNAppAuth: OIDAuthStateChangeDelegate {
     public func didChange(_ state: OIDAuthState) {
+        guard state === authState else { return }
         authStorage.store(state)
         onStateChangeListeners.forEach { listener in
             listener(state.isAuthorized)

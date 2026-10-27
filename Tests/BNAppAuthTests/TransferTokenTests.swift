@@ -86,4 +86,34 @@ final class TransferTokenTests: XCTestCase {
         XCTAssertNil(token)
         XCTAssertEqual(authServiceMock.performInvokeCount, 0)
     }
+
+    func testGetTransferToken_whenStateIsClearedDuringTheRefresh_shouldReturnNilAndKeepItCleared() async throws {
+        authState.performActionBeforeCompletion = { [unowned self] in
+            sut.clearState()
+            authState.stateChangeDelegate?.didChange(authState)
+        }
+
+        let token = try await sut.getTransferToken(resource: siteUrl)
+
+        XCTAssertNil(token)
+        XCTAssertFalse(sut.isAuthorized)
+        XCTAssertEqual(authStorageMock.storeInvokeCount, 0)
+        XCTAssertEqual(authServiceMock.performInvokeCount, 0)
+    }
+
+    func testGetIdToken_afterARefreshByGetTransferToken_shouldReturnTheRefreshedIdTokenAsUpdated() async throws {
+        authState.performActionBeforeCompletion = { [unowned self] in
+            authState.tokenResponseIdTokenReturnValue = "refreshedIdToken"
+            authState.tokenResponseAccessTokenExpirationDateReturnValue = Date().addingTimeInterval(3600)
+        }
+        _ = try await sut.getTransferToken(resource: siteUrl)
+
+        let response = try await withCheckedThrowingContinuation { continuation in
+            sut.getIdToken { continuation.resume(with: $0) }
+        }
+
+        XCTAssertEqual(response?.idToken, "refreshedIdToken")
+        XCTAssertEqual(response?.isUpdated, true)
+        XCTAssertEqual(authState.performActionInvokeCount, 1)
+    }
 }
