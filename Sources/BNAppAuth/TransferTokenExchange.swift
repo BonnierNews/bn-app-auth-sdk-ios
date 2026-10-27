@@ -44,7 +44,10 @@ final class TransferTokenExchange {
 
     private func requestTransferToken(origin: String, resource: String) async throws -> String? {
         guard let client = client() else { return nil }
-        guard (originsWithoutLogin[origin] ?? .distantPast) <= now() else { return nil }
+        guard (originsWithoutLogin[origin] ?? .distantPast) <= now() else {
+            Logger.transferToken.debug("No transfer token: %@ has no id-service client", origin)
+            return nil
+        }
 
         do {
             return try await exchangeWithTimeout(
@@ -53,6 +56,7 @@ final class TransferTokenExchange {
                 resource: resource
             )
         } catch where Self.isInvalidTarget(error) {
+            Logger.transferToken.debug("No transfer token: id-service has no client for %@", origin)
             originsWithoutLogin[origin] = now().addingTimeInterval(Self.originWithoutLoginTTL)
             return nil
         }
@@ -77,6 +81,8 @@ final class TransferTokenExchange {
                 },
                 Task {
                     try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+                    guard !Task.isCancelled else { return }
+                    Logger.transferToken.debug("No transfer token: id-service didn't answer within %.1f s", timeout)
                     result.resume(with: .success(nil))
                 }
             )
@@ -84,7 +90,10 @@ final class TransferTokenExchange {
     }
 
     private func exchange(clientId: String, clientSecret: String?, resource: String) async throws -> String? {
-        guard let accessToken = try await freshAccessToken() else { return nil }
+        guard let accessToken = try await freshAccessToken() else {
+            Logger.transferToken.debug("No transfer token: the user is logged out")
+            return nil
+        }
         let request = OIDTokenRequest(
             configuration: try await serviceConfiguration(),
             grantType: Self.tokenExchangeGrantType,
@@ -102,10 +111,12 @@ final class TransferTokenExchange {
                 "resource": resource
             ]
         )
-        guard
-            let response = try await performTokenRequest(request),
-            response.additionalParameters?["issued_token_type"] as? String == Self.sessionTransferTokenType
-        else { return nil }
+        guard let response = try await performTokenRequest(request) else { return nil }
+        let issuedTokenType = response.additionalParameters?["issued_token_type"] as? String
+        guard issuedTokenType == Self.sessionTransferTokenType else {
+            Logger.transferToken.debug("No transfer token: id-service issued %@", issuedTokenType ?? "nil")
+            return nil
+        }
         return response.accessToken
     }
 
@@ -134,4 +145,8 @@ private final class FirstResult {
         continuation.resume(with: result)
         tasks.forEach { $0.cancel() }
     }
+}
+
+private extension Logger {
+    static let transferToken = Category("transfer-token")
 }
