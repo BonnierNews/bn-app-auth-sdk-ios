@@ -9,14 +9,25 @@ final class TransferTokenExchangeTests: XCTestCase {
 
     var requests: [OIDTokenRequest] = []
     var accessToken: String? = "accessToken"
-    var response: () async throws -> String? = { "transferToken" }
+    var issuedTokenType = TransferTokenExchange.sessionTransferTokenType
+    var response: (OIDTokenRequest) async throws -> OIDTokenResponse? = { _ in nil }
     var time = Date(timeIntervalSince1970: 0)
 
     override func setUp() {
         super.setUp()
         requests = []
         accessToken = "accessToken"
-        response = { "transferToken" }
+        issuedTokenType = TransferTokenExchange.sessionTransferTokenType
+        response = { [unowned self] request in
+            OIDTokenResponse(
+                request: request,
+                parameters: [
+                    "access_token": "transferToken" as NSString,
+                    "token_type": "N_A" as NSString,
+                    "issued_token_type": self.issuedTokenType as NSString
+                ]
+            )
+        }
         time = Date(timeIntervalSince1970: 0)
     }
 
@@ -30,7 +41,7 @@ final class TransferTokenExchangeTests: XCTestCase {
             serviceConfiguration: { [unowned self] in self.serviceConfiguration },
             performTokenRequest: { [unowned self] request in
                 self.requests.append(request)
-                return try await self.response()
+                return try await self.response(request)
             },
             timeout: timeout,
             now: { [unowned self] in self.time }
@@ -45,7 +56,7 @@ final class TransferTokenExchangeTests: XCTestCase {
         )
     }
 
-    func testTransferToken_forResource_asksForATokenForTheUrl() async throws {
+    func testTransferToken_asksForASessionTransferTokenForTheUrl() async throws {
         let token = try await makeExchange().transferToken(resource: siteUrl)
 
         XCTAssertEqual(token, "transferToken")
@@ -58,19 +69,17 @@ final class TransferTokenExchangeTests: XCTestCase {
         XCTAssertEqual(request.additionalParameters, [
             "subject_token": "accessToken",
             "subject_token_type": TransferTokenExchange.accessTokenType,
+            "requested_token_type": TransferTokenExchange.sessionTransferTokenType,
             "resource": siteUrl.absoluteString
         ])
     }
 
-    func testTransferToken_forAudience_asksForATokenForTheClient() async throws {
-        let token = try await makeExchange().transferToken(audience: "site-web")
+    func testTransferToken_whenIdServiceIssuesAnotherKindOfToken_shouldReturnNil() async throws {
+        issuedTokenType = "urn:bonniernews:oauth:token-type:login_token"
 
-        XCTAssertEqual(token, "transferToken")
-        XCTAssertEqual(requests.first?.additionalParameters, [
-            "subject_token": "accessToken",
-            "subject_token_type": TransferTokenExchange.accessTokenType,
-            "audience": "site-web"
-        ])
+        let token = try await makeExchange().transferToken(resource: siteUrl)
+
+        XCTAssertNil(token)
     }
 
     func testTransferToken_beforeConfigure_shouldReturnNilWithoutRequest() async throws {
@@ -98,42 +107,32 @@ final class TransferTokenExchangeTests: XCTestCase {
 
     func testTransferToken_whenIdServiceHasNoClient_shouldReturnNilWithoutThrowing() async throws {
         let error = tokenError(TransferTokenExchange.invalidTarget)
-        response = { throw error }
+        response = { _ in throw error }
 
         let token = try await makeExchange().transferToken(resource: siteUrl)
 
         XCTAssertNil(token)
     }
 
-    func testTransferToken_remembersSitesWithoutIdServiceLogin() async throws {
+    func testTransferToken_remembersOriginsWithoutIdServiceLogin() async throws {
         let error = tokenError(TransferTokenExchange.invalidTarget)
-        response = { throw error }
+        response = { _ in throw error }
         let exchange = makeExchange()
 
         _ = try await exchange.transferToken(resource: siteUrl)
-        _ = try await exchange.transferToken(resource: URL(string: "https://www.site.se/other/")!)
+        _ = try await exchange.transferToken(resource: URL(string: "https://WWW.SITE.SE:443/other/")!)
+        _ = try await exchange.transferToken(resource: URL(string: "https://www.site.se:8443/other/")!)
 
-        XCTAssertEqual(requests.count, 1)
+        XCTAssertEqual(requests.count, 2)
     }
 
-    func testTransferToken_remembersAudiencesWithoutAClient() async throws {
+    func testTransferToken_asksAgainOnceAnOriginWithoutLoginHasExpired() async throws {
         let error = tokenError(TransferTokenExchange.invalidTarget)
-        response = { throw error }
-        let exchange = makeExchange()
-
-        _ = try await exchange.transferToken(audience: "unknown-client")
-        _ = try await exchange.transferToken(audience: "unknown-client")
-
-        XCTAssertEqual(requests.count, 1)
-    }
-
-    func testTransferToken_asksAgainOnceASiteWithoutLoginHasExpired() async throws {
-        let error = tokenError(TransferTokenExchange.invalidTarget)
-        response = { throw error }
+        response = { _ in throw error }
         let exchange = makeExchange()
 
         _ = try await exchange.transferToken(resource: siteUrl)
-        time = time.addingTimeInterval(TransferTokenExchange.targetWithoutLoginTTL + 1)
+        time = time.addingTimeInterval(TransferTokenExchange.originWithoutLoginTTL + 1)
         _ = try await exchange.transferToken(resource: siteUrl)
 
         XCTAssertEqual(requests.count, 2)
@@ -141,7 +140,7 @@ final class TransferTokenExchangeTests: XCTestCase {
 
     func testTransferToken_whenExchangeFails_shouldThrowAndAskAgainNextTime() async throws {
         let error = tokenError("invalid_grant")
-        response = { throw error }
+        response = { _ in throw error }
         let exchange = makeExchange()
 
         do {
@@ -154,9 +153,9 @@ final class TransferTokenExchangeTests: XCTestCase {
     }
 
     func testTransferToken_whenIdServiceIsTooSlow_shouldReturnNil() async throws {
-        response = {
+        response = { _ in
             try await Task.sleep(nanoseconds: 10_000_000_000)
-            return "transferToken"
+            return nil
         }
 
         let token = try await makeExchange(timeout: 0.1).transferToken(resource: siteUrl)

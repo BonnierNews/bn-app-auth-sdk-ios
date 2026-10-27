@@ -15,7 +15,6 @@ enum ExampleConfig {
     static let loginRedirectURL = url("EXAMPLE_LOGIN_REDIRECT_URL")
     static let logoutRedirectURL = url("EXAMPLE_LOGOUT_REDIRECT_URL")
     static let transferTokenResource = url("EXAMPLE_TRANSFER_TOKEN_RESOURCE")
-    static let transferTokenAudience = value("EXAMPLE_TRANSFER_TOKEN_AUDIENCE")
 
     private static func value(_ key: String) -> String {
         Bundle.main.object(forInfoDictionaryKey: key) as? String ?? ""

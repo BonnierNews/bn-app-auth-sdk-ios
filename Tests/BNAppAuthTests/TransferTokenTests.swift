@@ -2,7 +2,6 @@ import AppAuth
 import XCTest
 @testable import BNAppAuth
 
-// The exchange logic itself is covered by TransferTokenExchangeTests.
 final class TransferTokenTests: XCTestCase {
 
     var sut: BNAppAuth!
@@ -46,7 +45,11 @@ final class TransferTokenTests: XCTestCase {
                 codeVerifier: nil,
                 additionalParameters: nil
             ),
-            parameters: ["access_token": "transferToken" as NSString, "token_type": "N_A" as NSString]
+            parameters: [
+                "access_token": "transferToken" as NSString,
+                "token_type": "N_A" as NSString,
+                "issued_token_type": TransferTokenExchange.sessionTransferTokenType as NSString
+            ]
         )
     }
 
@@ -69,7 +72,7 @@ final class TransferTokenTests: XCTestCase {
     }
 
     func testGetTransferToken_neverReplacesTheUsersOwnTokens() async throws {
-        _ = try await sut.getTransferToken(audience: "site-web")
+        _ = try await sut.getTransferToken(resource: siteUrl)
 
         XCTAssertEqual(authStorageMock.storeInvokeCount, 0)
         XCTAssertTrue(authStorageMock._storedState === authState)

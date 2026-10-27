@@ -122,32 +122,34 @@ BNAppAuth.shared.getIdToken { result in
 
 ## Transfer tokens
 
-A transfer token is a short-lived token that logs the user in on another site in the same session as the app. The SDK exchanges the user's access token for one at id-service. It never changes the user's own tokens.
-
-There is one method for each kind of target:
+A session transfer token is a short-lived token that logs the user in on another site, in the same sign-in session as the app. The SDK exchanges the user's access token for one at id-service, for the URL the app is about to open. It never changes the user's own tokens.
 
 ```swift
-// Web views: the id-service client id of the site.
-let token = try await BNAppAuth.shared.getTransferToken(audience: "site-client-id")
-
-// External browsers: the URL that is about to open.
-if let token = try await BNAppAuth.shared.getTransferToken(resource: url),
-   var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
-    components.queryItems = (components.queryItems ?? []) + [
-        URLQueryItem(name: BNAppAuth.transferTokenParameter, value: token)
-    ]
-    url = components.url ?? url
-}
+let token = try await BNAppAuth.shared.getTransferToken(resource: url)
 ```
 
-Add the token to the URL as `BNAppAuth.transferTokenParameter` (`idtransfertoken`). The site exchanges it for its own login.
+How the app uses the token depends on where the site opens:
 
-- **A nil token** means there is no token to add right now. Open the URL as it is. That happens when:
+- **In a browser:** add the token to the URL as `BNAppAuth.transferTokenParameter` (`idtransfertoken`). The site's connector redeems it, sets the session cookie and redirects to the same URL without the token.
+  ```swift
+  if let token, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+      components.queryItems = (components.queryItems ?? []) + [
+          URLQueryItem(name: BNAppAuth.transferTokenParameter, value: token)
+      ]
+      url = components.url ?? url
+  }
+  ```
+- **In a web view:** before loading the page, POST the token as the form field `session_transfer_token` to the site's `/id/session`, and put the session cookies from the `204` response into the web view's cookie store. Logging out of the app doesn't end the site's session, so clear the web view's cookies when the user logs out.
+
+The token lives for 180 seconds and works once, so ask for a new one every time a site is opened.
+
+- **A nil token** means there is no token right now. Open the URL as it is. That happens when:
   - the user is logged out,
-  - id-service has no client for the audience or site (it answers `invalid_target`, and the SDK then skips that audience or site for 24 hours), or
+  - id-service has no client for the site (it answers `invalid_target`, and the SDK then skips the site's origin for 24 hours),
+  - id-service answers with another kind of token than a session transfer token, or
   - id-service didn't answer within 2 seconds.
 - **A thrown error** means the exchange failed. Open the URL as it is. The next call tries again.
-- **Only https URLs** get a token, since the token ends up in the URL the browser opens.
+- **Only https URLs** get a token, since the token can end up in the URL the browser opens.
 
 ## Authentication state
 
@@ -173,9 +175,9 @@ With `useMigration: true`, the first `getIdToken` call after an update exchanges
 3. **Force refresh**: calls `getIdToken(forceRefresh: true)`.
 4. **Get login token**: calls `getIdToken(getLoginToken: true)`.
 5. **Exchange token / test migration**: resets the `BnMigrationCompleted` flag in `UserDefaults`, so the migration from `/oidc` to `/oauth` runs again without reinstalling the app.
-6. **Transfer token (resource / audience)**: calls `getTransferToken(resource:)` or `getTransferToken(audience:)` and shows the token, "No token" or the error.
+6. **Transfer token**: calls `getTransferToken(resource:)` for the test site and shows the token, "No token" or the error.
 
-The client configuration and the site and client id the transfer token buttons use come from `BNAppAuthExample/Example.xcconfig`, which holds dummy values. To run the app against a real environment, copy `BNAppAuthExample/.env.xcconfig.sample` to `.env.xcconfig` in the same folder and fill in your values. The file is git-ignored, so it never gets committed. In xcconfig files `//` starts a comment, so write urls with `:/$()/` instead of `://`.
+The client configuration and the site the transfer token button uses come from `BNAppAuthExample/Example.xcconfig`, which holds dummy values. To run the app against a real environment, copy `BNAppAuthExample/.env.xcconfig.sample` to `.env.xcconfig` in the same folder and fill in your values. The file is git-ignored, so it never gets committed. In xcconfig files `//` starts a comment, so write urls with `:/$()/` instead of `://`.
 
 ## License
 

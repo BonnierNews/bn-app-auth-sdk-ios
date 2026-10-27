@@ -12,8 +12,6 @@
 	<string>$(EXAMPLE_LOGOUT_REDIRECT_URL)</string>
 	<key>EXAMPLE_TRANSFER_TOKEN_RESOURCE</key>
 	<string>$(EXAMPLE_TRANSFER_TOKEN_RESOURCE)</string>
-	<key>EXAMPLE_TRANSFER_TOKEN_AUDIENCE</key>
-	<string>$(EXAMPLE_TRANSFER_TOKEN_AUDIENCE)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -523,16 +523,10 @@ public class BNAppAuth: NSObject {
     }
 
 
-    /// Exchanges the user's access token for a short-lived transfer token for the id-service client `audience`,
-    /// used to log the user in in a web view. Returns nil when no token can be issued right now: the user is
-    /// logged out, id-service has no such client, or id-service is too slow. Throws when the exchange fails.
-    public func getTransferToken(audience: String) async throws -> String? {
-        try await logTransferTokenFailure { try await self.transferTokenExchange.transferToken(audience: audience) }
-    }
-
-    /// Exchanges the user's access token for a short-lived transfer token for the site at `resource`, to be added
-    /// to the url as `transferTokenParameter` when it opens in a browser. Only https urls get a token. Returns nil
-    /// and throws like the audience variant.
+    /// Exchanges the user's access token for a short-lived session transfer token that logs the user in on the
+    /// site at `resource`, the https url the app is about to open. Returns nil when no token can be issued right
+    /// now: the user is logged out, id-service has no client for the site, or id-service is too slow. Throws when
+    /// the exchange fails.
     public func getTransferToken(resource: URL) async throws -> String? {
         try await logTransferTokenFailure { try await self.transferTokenExchange.transferToken(resource: resource) }
     }
@@ -601,14 +595,13 @@ public class BNAppAuth: NSObject {
         }
     }
 
-    // Performed straight on the authorization service, since the response must never replace the user's own tokens.
-    private func performTransferTokenRequest(_ request: OIDTokenRequest) async throws -> String? {
+    private func performTransferTokenRequest(_ request: OIDTokenRequest) async throws -> OIDTokenResponse? {
         try await withCheckedThrowingContinuation { continuation in
             authService.perform(request) { response, error in
                 if let error {
                     continuation.resume(throwing: error)
                 } else {
-                    continuation.resume(returning: response?.accessToken)
+                    continuation.resume(returning: response)
                 }
             }
         }

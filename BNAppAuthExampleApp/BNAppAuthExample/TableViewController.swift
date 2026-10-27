@@ -59,22 +59,10 @@ class TableViewController: UITableViewController {
     
     lazy var transferTokenResourceButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Transfer Token (resource)", for: .normal)
+        button.setTitle("Transfer Token", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.backgroundColor = .systemGray6
         button.addTarget(self, action: #selector(transferTokenResourcePressed), for: .touchUpInside)
-        button.layer.cornerRadius = 8
-        button.clipsToBounds = true
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
-        return button
-    }()
-
-    lazy var transferTokenAudienceButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("Transfer Token (audience)", for: .normal)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = .systemGray6
-        button.addTarget(self, action: #selector(transferTokenAudiencePressed), for: .touchUpInside)
         button.layer.cornerRadius = 8
         button.clipsToBounds = true
         button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
@@ -126,7 +114,7 @@ class TableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 0 {
-            return 401
+            return 345
         }
         return 30
     }
@@ -139,13 +127,11 @@ class TableViewController: UITableViewController {
             containerView.addSubview(getLoginToken)
             containerView.addSubview(exchangeTokenButton)
             containerView.addSubview(transferTokenResourceButton)
-            containerView.addSubview(transferTokenAudienceButton)
             loginButton.translatesAutoresizingMaskIntoConstraints = false
             refreshButton.translatesAutoresizingMaskIntoConstraints = false
             getLoginToken.translatesAutoresizingMaskIntoConstraints = false
             exchangeTokenButton.translatesAutoresizingMaskIntoConstraints = false
             transferTokenResourceButton.translatesAutoresizingMaskIntoConstraints = false
-            transferTokenAudienceButton.translatesAutoresizingMaskIntoConstraints = false
             
             containerView.addConstraints([
                 loginButton.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
@@ -167,11 +153,7 @@ class TableViewController: UITableViewController {
                 transferTokenResourceButton.topAnchor.constraint(equalTo: exchangeTokenButton.bottomAnchor, constant: 12),
                 transferTokenResourceButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
                 transferTokenResourceButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-                transferTokenResourceButton.heightAnchor.constraint(equalToConstant: 44),
-                transferTokenAudienceButton.topAnchor.constraint(equalTo: transferTokenResourceButton.bottomAnchor, constant: 12),
-                transferTokenAudienceButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-                transferTokenAudienceButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-                transferTokenAudienceButton.heightAnchor.constraint(equalToConstant: 44)
+                transferTokenResourceButton.heightAnchor.constraint(equalToConstant: 44)
             ])
             
             return containerView
@@ -307,14 +289,8 @@ class TableViewController: UITableViewController {
     }
 
     @objc private func transferTokenResourcePressed() {
-        showTransferToken(key: "transfer token (resource)") {
+        showTransferToken(key: "transfer token") {
             try await BNAppAuth.shared.getTransferToken(resource: ExampleConfig.transferTokenResource)
-        }
-    }
-
-    @objc private func transferTokenAudiencePressed() {
-        showTransferToken(key: "transfer token (audience)") {
-            try await BNAppAuth.shared.getTransferToken(audience: ExampleConfig.transferTokenAudience)
         }
     }
 

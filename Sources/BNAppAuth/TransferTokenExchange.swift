@@ -1,33 +1,30 @@
 import AppAuth
 import Foundation
 
-/// Exchanges the user's access token for short-lived transfer tokens that log the user in on other sites.
-/// Kept apart from BNAppAuth, which owns the user's tokens and only lends out a fresh access token.
-/// Runs on the main actor, which keeps targetsWithoutLogin to a single thread.
 @MainActor
 final class TransferTokenExchange {
     nonisolated static let tokenExchangeGrantType = "urn:ietf:params:oauth:grant-type:token-exchange"
     nonisolated static let accessTokenType = "urn:ietf:params:oauth:token-type:access_token"
-    // id-service requires a scope. Only openid, since the token is for another client than the app.
+    nonisolated static let sessionTransferTokenType = "urn:bonniernews:oauth:token-type:session_transfer_token"
     nonisolated static let scope = OIDScopeOpenID
     nonisolated static let invalidTarget = "invalid_target"
     nonisolated static let timeout: TimeInterval = 2
-    nonisolated static let targetWithoutLoginTTL: TimeInterval = 24 * 60 * 60
+    nonisolated static let originWithoutLoginTTL: TimeInterval = 24 * 60 * 60
 
     private let client: @MainActor () -> BNAppAuth.ClientConfiguration?
     private let freshAccessToken: @MainActor () async throws -> String?
     private let serviceConfiguration: @MainActor () async throws -> OIDServiceConfiguration
-    private let performTokenRequest: @MainActor (OIDTokenRequest) async throws -> String?
+    private let performTokenRequest: @MainActor (OIDTokenRequest) async throws -> OIDTokenResponse?
     private let timeout: TimeInterval
     private let now: @MainActor () -> Date
 
-    private var targetsWithoutLogin: [String: Date] = [:]
+    private var originsWithoutLogin: [String: Date] = [:]
 
     nonisolated init(
         client: @escaping @MainActor () -> BNAppAuth.ClientConfiguration?,
         freshAccessToken: @escaping @MainActor () async throws -> String?,
         serviceConfiguration: @escaping @MainActor () async throws -> OIDServiceConfiguration,
-        performTokenRequest: @escaping @MainActor (OIDTokenRequest) async throws -> String?,
+        performTokenRequest: @escaping @MainActor (OIDTokenRequest) async throws -> OIDTokenResponse?,
         timeout: TimeInterval = TransferTokenExchange.timeout,
         now: @escaping @MainActor () -> Date = Date.init
     ) {
@@ -39,37 +36,32 @@ final class TransferTokenExchange {
         self.now = now
     }
 
-    func transferToken(audience: String) async throws -> String? {
-        try await requestTransferToken(targetKey: audience, target: ["audience": audience])
-    }
-
     func transferToken(resource: URL) async throws -> String? {
-        // The token ends up in the url the browser opens, so it is never added to anything but https.
-        guard resource.scheme == "https", let host = resource.host else { return nil }
-        return try await requestTransferToken(targetKey: host, target: ["resource": resource.absoluteString])
+        guard resource.scheme == "https", let host = resource.host, !host.isEmpty else { return nil }
+        let origin = "https://\(host.lowercased()):\(resource.port ?? 443)"
+        return try await requestTransferToken(origin: origin, resource: resource.absoluteString)
     }
 
-    private func requestTransferToken(targetKey: String, target: [String: String]) async throws -> String? {
+    private func requestTransferToken(origin: String, resource: String) async throws -> String? {
         guard let client = client() else { return nil }
-        guard (targetsWithoutLogin[targetKey] ?? .distantPast) <= now() else { return nil }
+        guard (originsWithoutLogin[origin] ?? .distantPast) <= now() else { return nil }
 
         do {
             return try await exchangeWithTimeout(
                 clientId: client.clientId,
                 clientSecret: client.clientSecret,
-                target: target
+                resource: resource
             )
         } catch where Self.isInvalidTarget(error) {
-            targetsWithoutLogin[targetKey] = now().addingTimeInterval(Self.targetWithoutLoginTTL)
+            originsWithoutLogin[origin] = now().addingTimeInterval(Self.originWithoutLoginTTL)
             return nil
         }
     }
 
-    // Returns nil once the timeout has passed, even if the exchange is still waiting for id-service.
     private func exchangeWithTimeout(
         clientId: String,
         clientSecret: String?,
-        target: [String: String]
+        resource: String
     ) async throws -> String? {
         let timeout = self.timeout
         return try await withCheckedThrowingContinuation { continuation in
@@ -77,7 +69,7 @@ final class TransferTokenExchange {
             result.race(
                 Task {
                     do {
-                        let token = try await self.exchange(clientId: clientId, clientSecret: clientSecret, target: target)
+                        let token = try await self.exchange(clientId: clientId, clientSecret: clientSecret, resource: resource)
                         result.resume(with: .success(token))
                     } catch {
                         result.resume(with: .failure(error))
@@ -91,7 +83,7 @@ final class TransferTokenExchange {
         }
     }
 
-    private func exchange(clientId: String, clientSecret: String?, target: [String: String]) async throws -> String? {
+    private func exchange(clientId: String, clientSecret: String?, resource: String) async throws -> String? {
         guard let accessToken = try await freshAccessToken() else { return nil }
         let request = OIDTokenRequest(
             configuration: try await serviceConfiguration(),
@@ -105,10 +97,16 @@ final class TransferTokenExchange {
             codeVerifier: nil,
             additionalParameters: [
                 "subject_token": accessToken,
-                "subject_token_type": Self.accessTokenType
-            ].merging(target) { _, targetValue in targetValue }
+                "subject_token_type": Self.accessTokenType,
+                "requested_token_type": Self.sessionTransferTokenType,
+                "resource": resource
+            ]
         )
-        return try await performTokenRequest(request)
+        guard
+            let response = try await performTokenRequest(request),
+            response.additionalParameters?["issued_token_type"] as? String == Self.sessionTransferTokenType
+        else { return nil }
+        return response.accessToken
     }
 
     private static func isInvalidTarget(_ error: Error) -> Bool {
@@ -117,7 +115,6 @@ final class TransferTokenExchange {
     }
 }
 
-// Resumes the continuation with whichever task finishes first, and cancels the others.
 @MainActor
 private final class FirstResult {
     private var continuation: CheckedContinuation<String?, Error>?
