@@ -92,7 +92,7 @@ BNAppAuth.shared.login { result in
 |---|---|
 | `login(token:action:locale:consentId:completion:)` | Starts the login flow. All arguments are optional: `token` logs the user in with a login token, `action` is passed to id-service (for example `create-user`), `locale` sets the language of the login page, and `consentId` passes on the user's consent. |
 | `createAccount(locale:consentId:completion:)` | Starts the login flow on the create account page. |
-| `logout(completion:)` | Ends the session at id-service and clears the stored state. It only fails if the user cancels. Other errors still log the user out locally. |
+| `logout(completion:)` | Ends the session at id-service and clears the stored state. It fails, and the user stays logged in, when the user cancels, id-service's configuration can't be fetched or the logout page can't be shown. Other errors from the logout page still clear the stored state. |
 | `continueAuthorization(_ url:) -> Bool` | Finishes a login or logout when the app is opened with a redirect URL. Returns `false` if the URL wasn't for an ongoing flow. |
 
 ## ID tokens

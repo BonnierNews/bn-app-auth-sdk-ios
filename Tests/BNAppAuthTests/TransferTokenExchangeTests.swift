@@ -153,9 +153,10 @@ final class TransferTokenExchangeTests: XCTestCase {
     }
 
     func testTransferToken_whenIdServiceIsTooSlow_shouldReturnNil() async throws {
-        response = { _ in
+        let respond = response
+        response = { request in
             try await Task.sleep(nanoseconds: 10_000_000_000)
-            return nil
+            return try await respond(request)
         }
 
         let token = try await makeExchange(timeout: 0.1).transferToken(resource: siteUrl)
