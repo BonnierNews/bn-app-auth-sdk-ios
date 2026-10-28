@@ -34,6 +34,15 @@ class AuthStateMock: OIDAuthState {
          }
      }
 
+    var tokenResponseAccessTokenExpirationDateReturnValue: Date? {
+        get {
+            (lastTokenResponse as? TokenResponseMock)?.accessTokenExpirationDateReturnValue
+        }
+        set {
+            (lastTokenResponse as? TokenResponseMock)?.accessTokenExpirationDateReturnValue = newValue
+        }
+    }
+
     var tokenResponseIdTokenReturnValue: String? {
         get {
             (lastTokenResponse as? TokenResponseMock)?.idTokenReturnValue
@@ -69,17 +78,20 @@ class AuthStateMock: OIDAuthState {
         setNeedsTokenRefreshWasCalledTimes?(setNeedsTokenRefreshInvokeCount)
     }
 
+    var performActionAccessTokenReturnValue: String?
     var performActionIdTokenReturnValue: String? = "tokenId"
     var performActionErrorReturnValue: NSError? = nil
     var performActionWasCalledTimes: ((Int) -> Void)?
     var performActionInvokeCount = 0
     var performActionLastAdditionalParameters: [String: String]?
+    var performActionBeforeCompletion: (() -> Void)?
     override func performAction(freshTokens action: @escaping OIDAuthStateAction, additionalRefreshParameters additionalParameters: [String : String]?) {
         performActionInvokeCount += 1
         performActionLastAdditionalParameters = additionalParameters
         performActionWasCalledTimes?(performActionInvokeCount)
+        performActionBeforeCompletion?()
 
-        action(nil,performActionIdTokenReturnValue,performActionErrorReturnValue)
+        action(performActionAccessTokenReturnValue,performActionIdTokenReturnValue,performActionErrorReturnValue)
 
     }
 }
@@ -93,6 +105,11 @@ class TokenResponseMock: OIDTokenResponse {
     }
     override var idToken: String? {
         idTokenReturnValue
+    }
+
+    var accessTokenExpirationDateReturnValue: Date?
+    override var accessTokenExpirationDate: Date? {
+        accessTokenExpirationDateReturnValue
     }
 }
 

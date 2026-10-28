@@ -8,6 +8,23 @@
 import UIKit
 import BNAppAuth
 
+// The values come from Example.xcconfig and your git-ignored .env.xcconfig, through Info.plist.
+enum ExampleConfig {
+    static let issuer = url("EXAMPLE_ISSUER")
+    static let clientId = value("EXAMPLE_CLIENT_ID")
+    static let loginRedirectURL = url("EXAMPLE_LOGIN_REDIRECT_URL")
+    static let logoutRedirectURL = url("EXAMPLE_LOGOUT_REDIRECT_URL")
+    static let transferTokenResource = url("EXAMPLE_TRANSFER_TOKEN_RESOURCE")
+
+    private static func value(_ key: String) -> String {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? ""
+    }
+
+    private static func url(_ key: String) -> URL {
+        URL(string: value(key))!
+    }
+}
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
@@ -15,11 +32,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         let client = BNAppAuth.ClientConfiguration(
-            issuer: URL(string: "https://oidc-provider.com/")!,
-            clientId: "client-id",
+            issuer: ExampleConfig.issuer,
+            clientId: ExampleConfig.clientId,
             clientSecret: nil,
-            loginRedirectURL: URL(string: "custom.redirect.scheme://www.test.se/login")!,
-            logoutRedirectUrl: URL(string: "custom.redirect.scheme://www.test.se/logout")!
+            loginRedirectURL: ExampleConfig.loginRedirectURL,
+            logoutRedirectUrl: ExampleConfig.logoutRedirectURL,
+            customScopes: ["profile", "offline_access", "entitlements", "external_ids", "email", "old_bnidtoken"]
         )
     
         UserDefaults.standard.set(true, forKey: "BnMigrationCompleted")

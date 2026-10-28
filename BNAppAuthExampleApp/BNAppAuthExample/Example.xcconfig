@@ -1,0 +1,11 @@
+// The example app's client and test values. Dummy values here; your own go in the git-ignored
+// .env.xcconfig next to this file (copy .env.xcconfig.sample), which overrides them.
+// In xcconfig files // starts a comment, so urls are written with :/$()/ instead of ://.
+
+EXAMPLE_ISSUER = https:/$()/oidc-provider.com/
+EXAMPLE_CLIENT_ID = client-id
+EXAMPLE_LOGIN_REDIRECT_URL = custom.redirect.scheme:/$()/www.test.se/login
+EXAMPLE_LOGOUT_REDIRECT_URL = custom.redirect.scheme:/$()/www.test.se/logout
+EXAMPLE_TRANSFER_TOKEN_RESOURCE = https:/$()/www.example.com/
+
+#include? ".env.xcconfig"

@@ -6,6 +6,8 @@ import UIKit
 public class BNAppAuth: NSObject {
     public static let shared = BNAppAuth()
 
+    public static let transferTokenParameter = "idtransfertoken"
+
     public weak var delegate: UIViewController?
 
     private let authStorage: AuthStoraging
@@ -19,6 +21,19 @@ public class BNAppAuth: NSObject {
     private let isolationQueue = DispatchQueue(label: "se.bonniernews.bnappauth.isolation")
     private let tokenMutex = NSLock()
     private var isMigrationDone = false
+
+    @MainActor private lazy var transferTokenExchange = TransferTokenExchange(
+        client: { [weak self] in self?.client },
+        freshAccessToken: { [weak self] in try await self?.freshAccessToken() },
+        serviceConfiguration: { [weak self] in
+            guard let self else { throw BNAppAuthError.clientNotConfigured }
+            return try await self.fetchServiceConfiguration()
+        },
+        performTokenRequest: { [weak self] request in
+            guard let self else { throw BNAppAuthError.clientNotConfigured }
+            return try await self.performTransferTokenRequest(request)
+        }
+    )
 
     private var needsMigration: Bool {
         get {
@@ -304,8 +319,10 @@ public class BNAppAuth: NSObject {
                 let bnIdToken = (client.customScopes?.contains("old_bnidtoken") == true)
                     ? (params?["old_bnidtoken"] as? String)
                     : nil
-                if let idToken = self.currentToken {
-                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: false, loginToken: nil)))
+                if let idToken = currentAuthState.lastTokenResponse?.idToken ?? self.currentToken {
+                    let isUpdated = idToken != self.currentToken
+                    self.currentToken = idToken
+                    completion(.success(TokenResponse(idToken: idToken, bnIdToken: bnIdToken, isUpdated: isUpdated, loginToken: nil)))
                     return
                 }
             }
@@ -508,6 +525,94 @@ public class BNAppAuth: NSObject {
     }
 
 
+    /// Exchanges the user's access token for a short-lived session transfer token that logs the user in on the
+    /// site at `resource`, the https url the app is about to open. Returns nil when no token can be issued right
+    /// now: the user is logged out, id-service has no client for the site, or id-service is too slow. Throws when
+    /// the exchange fails.
+    @MainActor
+    public func getTransferToken(resource: URL) async throws -> String? {
+        try await logTransferTokenFailure { try await self.transferTokenExchange.transferToken(resource: resource) }
+    }
+
+    @MainActor
+    private func logTransferTokenFailure(_ transferToken: () async throws -> String?) async throws -> String? {
+        do {
+            return try await transferToken()
+        } catch {
+            Logger.authentication.error("getTransferToken failed: %@", error.localizedDescription)
+            throw error
+        }
+    }
+
+    private func freshAccessToken() async throws -> String? {
+        try await withCheckedThrowingContinuation { continuation in
+            freshAccessToken { continuation.resume(with: $0) }
+        }
+    }
+
+    // Same queue and lock as getIdToken, so a refresh never runs twice at once.
+    private func freshAccessToken(completion: @escaping (Result<String?, Error>) -> Void) {
+        isolationQueue.async { [weak self] in
+            guard let self else {
+                completion(.success(nil))
+                return
+            }
+
+            self.tokenMutex.lock()
+            defer { self.tokenMutex.unlock() }
+
+            guard self.isAuthorized, let authState = self.authState else {
+                completion(.success(nil))
+                return
+            }
+
+            let sema = DispatchSemaphore(value: 0)
+            authState.performAction(
+                freshTokens: { accessToken, _, error in
+                    if self.authState !== authState {
+                        completion(.success(nil))
+                    } else if let error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(accessToken))
+                    }
+                    sema.signal()
+                },
+                additionalRefreshParameters: nil
+            )
+            sema.wait()
+        }
+    }
+
+    private func fetchServiceConfiguration() async throws -> OIDServiceConfiguration {
+        if let configuration = authState?.lastAuthorizationResponse.request.configuration {
+            return configuration
+        }
+        guard let client else { throw BNAppAuthError.clientNotConfigured }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            authService.discoverConfiguration(forIssuer: client.issuer) { configuration, error in
+                if let configuration {
+                    continuation.resume(returning: configuration)
+                } else {
+                    continuation.resume(throwing: error ?? BNAppAuthError.oidcConfigurationNotFound)
+                }
+            }
+        }
+    }
+
+    private func performTransferTokenRequest(_ request: OIDTokenRequest) async throws -> OIDTokenResponse? {
+        try await withCheckedThrowingContinuation { continuation in
+            authService.perform(request) { response, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: response)
+                }
+            }
+        }
+    }
+
     public func clearState() {
         setAuthState(nil)
     }
@@ -524,6 +629,7 @@ public class BNAppAuth: NSObject {
 
 extension BNAppAuth: OIDAuthStateChangeDelegate {
     public func didChange(_ state: OIDAuthState) {
+        guard state === authState else { return }
         authStorage.store(state)
         onStateChangeListeners.forEach { listener in
             listener(state.isAuthorized)

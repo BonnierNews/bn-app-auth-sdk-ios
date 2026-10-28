@@ -1,105 +1,206 @@
-# BNAppAuth SDK
+# BNAppAuth for iOS
 
-BNAppAuth is an iOS library for handling authentication using the AppAuth library. It provides a simple interface for logging in, logging out, and managing authentication tokens.
+BNAppAuth is the Bonnier News login SDK for iOS. It wraps [AppAuth-iOS](https://github.com/openid/AppAuth-iOS) and gives the apps one place for everything that talks to id-service: logging in and out, creating accounts, keeping tokens fresh, and handing out transfer tokens that log the user in on other sites.
 
-## Features
-- **Login**: Allows users to authenticate.
-- **Account Creation**: Facilitates user registration.
-- **Logout**: Log users out.
-- **Token Management**: Retrieve and refresh ID tokens.
-- **State Management**: Stores and clears authentication state securely.
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Getting started](#getting-started)
+- [Configuration](#configuration)
+- [Logging in and out](#logging-in-and-out)
+- [ID tokens](#id-tokens)
+- [Transfer tokens](#transfer-tokens)
+- [Authentication state](#authentication-state)
+- [Migrating from /oidc to /oauth](#migrating-from-oidc-to-oauth)
+- [Example app](#example-app)
+- [License](#license)
 
-## Setup
-The module is imported with Swift Package Manager.
+## Requirements
 
-## Initialization
-To use the SDK, you need to first configure it.
+- iOS 15 or later
+- Swift Package Manager
+
+## Installation
+
+Add the package to your project in Xcode (**File → Add Package Dependencies…**) or in `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/BonnierNews/bn-app-auth-sdk-ios", from: "<version>")
+]
 ```
+
+Then add the `BNAppAuth` product to your target and `import BNAppAuth`.
+
+## Getting started
+
+Configure the SDK once, early in the app's life, and give it a view controller to present the login and logout pages from:
+
+```swift
 let client = BNAppAuth.ClientConfiguration(
-    issuer: URL(string: "https://oidc-server-url")!,
-    clientId: "client-id",
-    clientSecret: nil,
-    loginRedirectURL: URL(string: "login-callback-url")!,
-    logoutRedirectUrl: URL(string: "logout-callback-url")!,
-    isDebuggable: true, // Enable for debugging
-    customScopes: ["custom-scope"], // Optional
-    useMigration: false, // Defaults to false, set to true to migrate uses from issuer /oidc to /oauth
+    issuer: URL(string: "https://id.bonniernews.se/oauth")!,
+    clientId: "your-client-id",
+    loginRedirectURL: URL(string: "your-app://login-callback")!,
+    logoutRedirectUrl: URL(string: "your-app://logout-callback")!
 )
+
 BNAppAuth.shared.configure(client: client)
+BNAppAuth.shared.delegate = rootViewController
 ```
 
-## Methods
+Pass the redirect URL on to the SDK when the app is opened with it, for example from your `SceneDelegate`:
 
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else { return }
+    _ = BNAppAuth.shared.continueAuthorization(url)
+}
 ```
-configure(client: ClientConfiguration)
-```
-Configures the client with necessary parameters.
-- **Parameters**:
-  - `client` (ClientConfiguration): The configuration containing client details like `clientId`, `clientSecret`, and `issuer`.
 
-```
-createAccount(completion: ((Result<Void,Error>) -> Void)?)
-```
-Initiates a login flow with action `create-user` to create an account.
-- **Parameters**:
-  - `completion` (Closure): Callback executed upon the completion of the login process.
+### Trying it in the example app
 
-```
-login(token: String? = nil, action: String? = nil, completion: ((Result<Void,Error>) -> Void)?)
-```
-Logs the user into the application.
-- **Parameters**:
-  - `token` (String?, optional): Token passed to the login request.
-  - `action` (String?, optional): Action that the login is associated with.
-  - `completion` (Closure): Callback executed upon the completion of the login process.
+The [example app](#example-app) reads its client configuration from `Example.xcconfig`, which holds dummy values that can't log in. Your own values go in a local, git-ignored `.env.xcconfig` next to it, which overrides them.
 
-```
-logout(completion: ((Result<Void,Error>) -> Void)?)
-```
-Logs the user out of the application.
-- **Parameters**:
-  - `completion` (Closure): Callback executed upon the completion of the logout process.
+1. Copy the sample:
+   ```bash
+   cp BNAppAuthExampleApp/BNAppAuthExample/.env.xcconfig.sample BNAppAuthExampleApp/BNAppAuthExample/.env.xcconfig
+   ```
+2. Fill in the values for the environment you want to test against. In xcconfig files `//` starts a comment, so write URLs with `:/$()/` instead of `://`, for example `https:/$()/id.bonniernews.se/oauth`.
 
-```
-continueAuthorization(_ url: URL) -> Bool
-```
-Continues the authorization flow by processing the URL passed from the external user agent.
-- **Parameters**:
-  - `url` (URL): The URL containing authorization response data.
-- **Returns**: 
-  - `true` if the flow was successfully continued, `false` otherwise.
+   | Key | Description |
+   |---|---|
+   | `EXAMPLE_ISSUER` | The id-service issuer URL. |
+   | `EXAMPLE_CLIENT_ID` | The app client's id in that environment. |
+   | `EXAMPLE_LOGIN_REDIRECT_URL` | The client's login redirect URL. |
+   | `EXAMPLE_LOGOUT_REDIRECT_URL` | The client's logout redirect URL. |
+   | `EXAMPLE_TRANSFER_TOKEN_RESOURCE` | The site the **Transfer token** button asks for a token for. It must have a site client in that environment, or the answer is "No token". |
 
-```
-getIdToken(forceRefresh: Bool = false, getLoginToken: Bool = false, completion: @escaping (Result<TokenResponse?,Error>) -> Void)
-```
-Fetches the ID token, optionally forcing a refresh or requesting a login token.
-- **Parameters**:
-  - `forceRefresh` (Bool): Whether to force a refresh of the token.
-  - `getLoginToken` (Bool): Whether to request a login token (magic link token) in the response.
-  - `completion` (Closure): Callback executed with the token response or an error.
+3. Open `BNAppAuthExampleApp/BNAppAuthExample.xcodeproj` and run the app. The values are read at build time, so rebuild after changing them.
 
-```
-clearState()
-```
-Clears the current authentication state.
+## Configuration
 
-```
-addOnStateChangeListener(_ listener: @escaping StateChangeListener)
-```
-Adds a listener to be notified whenever the authentication state changes.
-- **Parameters**:
-  - `listener` (StateChangeListener): Closure to execute when the state changes.
-  
+`BNAppAuth.ClientConfiguration` takes the following arguments, in this order:
 
-## Exampleapp
-The exampleapp in `BNAppAuthExampleApp/` is a sample iOS application demonstrating how to use the BNAppAuth library. It includes examples of configuring the library, initiating login and logout processes, and handling authentication tokens.
-1. **Configuration**: Setting up the BNAppAuth instance with the necessary client configuration.
-2. **Login/Logout**: Initiating the login and logout processes and handling the result.
-3. **Force Refresh**: Forcing a token refresh via `getIdToken(forceRefresh: true)`.
-4. **Get Login Token**: Fetching a magic link login token via `getIdToken(getLoginToken: true)`.
-5. **Exchange Token / Test Migration**: Resets the `BnMigrationCompleted` flag in UserDefaults, allowing you to re-trigger the migration flow. Use this button to test that the migration from `/oidc` to `/oauth` works correctly without needing to reinstall the app.
+| Argument | Default | Description |
+|---|---|---|
+| `issuer` | – | The id-service issuer URL. |
+| `clientId` | – | The app's OAuth client id. |
+| `clientSecret` | `nil` | The client secret, for clients that have one. |
+| `prompt` | `"select_account consent"` | The `prompt` sent with the login request. |
+| `loginRedirectURL` | – | Where id-service sends the user after logging in. |
+| `logoutRedirectUrl` | – | Where id-service sends the user after logging out. |
+| `useCustomBrowser` | `false` | Opens the login page in the Safari app instead of an in-app browser session. |
+| `customScopes` | `nil` | Extra scopes besides `openid`. Add `old_bnidtoken` to also get the legacy `bnIdToken`. |
+| `isDebuggable` | `false` | Kept for parity with the Android SDK. It has no effect on iOS. |
+| `useMigration` | `false` | Moves logged-in users from the old `/oidc` issuer to `/oauth`. See [Migrating from /oidc to /oauth](#migrating-from-oidc-to-oauth). |
+
+All requests to id-service time out after 5 seconds.
+
+## Logging in and out
+
+`login` and `logout` present id-service's pages from `delegate`, so set it first. Without a configured client and a `delegate`, both complete with an error straight away.
+
+```swift
+BNAppAuth.shared.login { result in
+    switch result {
+    case .success: // The user is logged in.
+    case .failure(let error): // The login failed or was cancelled.
+    }
+}
+```
+
+| Method | Description |
+|---|---|
+| `login(token:action:locale:consentId:completion:)` | Starts the login flow. All arguments are optional: `token` logs the user in with a login token, `action` is passed to id-service (for example `create-user`), `locale` sets the language of the login page, and `consentId` passes on the user's consent. |
+| `createAccount(locale:consentId:completion:)` | Starts the login flow on the create account page. |
+| `logout(completion:)` | Ends the session at id-service and clears the stored state. It fails, and the user stays logged in, when the user cancels, id-service's configuration can't be fetched or the logout page can't be shown. Other errors from the logout page still clear the stored state. |
+| `continueAuthorization(_ url:) -> Bool` | Finishes a login or logout when the app is opened with a redirect URL. Returns `false` if the URL wasn't for an ongoing flow. |
+
+## ID tokens
+
+```swift
+BNAppAuth.shared.getIdToken { result in
+    switch result {
+    case .success(let tokenResponse): // nil when the user is logged out
+    case .failure(let error):
+    }
+}
+```
+
+`getIdToken(forceRefresh:getLoginToken:completion:)` returns the current ID token, refreshing the tokens first when needed. While the tokens are valid for more than another minute, it answers without a network call.
+
+- `forceRefresh: true` always refreshes and asks id-service to bypass its cache.
+- `getLoginToken: true` refreshes and also returns a login token in `loginToken`.
+
+`BNAppAuth.TokenResponse` contains:
+
+| Property | Description |
+|---|---|
+| `idToken` | The ID token. |
+| `bnIdToken` | The legacy token, when `customScopes` contains `old_bnidtoken`. |
+| `isUpdated` | `true` when the ID token changed since the last call. |
+| `loginToken` | A login token, when asked for with `getLoginToken`. |
+
+## Transfer tokens
+
+A session transfer token is a short-lived token that logs the user in on another site, in the same sign-in session as the app. The SDK exchanges the user's access token for one at id-service, for the URL the app is about to open. It never changes the user's own tokens.
+
+```swift
+let token = try await BNAppAuth.shared.getTransferToken(resource: url)
+```
+
+How the app uses the token depends on where the site opens:
+
+- **In a browser:** add the token to the URL as `BNAppAuth.transferTokenParameter` (`idtransfertoken`). The site's connector redeems it, sets the session cookie and redirects to the same URL without the token.
+  ```swift
+  if let token, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+      components.queryItems = (components.queryItems ?? []) + [
+          URLQueryItem(name: BNAppAuth.transferTokenParameter, value: token)
+      ]
+      url = components.url ?? url
+  }
+  ```
+- **In a web view:** before loading the page, POST the token as the form field `session_transfer_token` to the site's `/id/session`, and put the session cookies from the `204` response into the web view's cookie store. Logging out of the app doesn't end the site's session, so clear the web view's cookies when the user logs out.
+
+The token lives for 180 seconds and works once, so ask for a new one every time a site is opened.
+
+- **A nil token** means there is no token right now. Open the URL as it is. That happens when:
+  - the user is logged out,
+  - id-service has no client for the site (it answers `invalid_target`, and the SDK then skips the site's origin for 24 hours),
+  - id-service answers with another kind of token than a session transfer token, or
+  - id-service didn't answer within 2 seconds.
+- **A thrown error** means the exchange failed. Open the URL as it is. The next call tries again.
+- **Only https URLs** get a token, since the token can end up in the URL the browser opens.
+
+## Authentication state
+
+| Member | Description |
+|---|---|
+| `isAuthorized` | Whether the user is logged in. |
+| `addOnStateChangeListener(_:)` | Calls the listener with the new `isAuthorized` value whenever the state changes. |
+| `clearState()` | Removes the stored state, which logs the user out locally without contacting id-service. |
+| `releaseResources()` | Does nothing on iOS. It exists for parity with the Android SDK. |
+
+The state is stored in the Keychain.
+
+## Migrating from /oidc to /oauth
+
+With `useMigration: true`, the first `getIdToken` call after an update exchanges the token from the old `/oidc` issuer for new `/oauth` tokens. It only runs once. If the exchange fails, the user is logged out. `exchangeIdToken(oldIdToken:newExchangeEndpoint:completion:)` is the public method that performs this exchange.
+
+## Example app
+
+`BNAppAuthExampleApp/` is a UIKit app for trying the SDK by hand:
+
+1. **Configuration**: sets up `BNAppAuth` with a client configuration.
+2. **Login and logout**: starts the flows and shows the result.
+3. **Force refresh**: calls `getIdToken(forceRefresh: true)`.
+4. **Get login token**: calls `getIdToken(getLoginToken: true)`.
+5. **Exchange token / test migration**: resets the `BnMigrationCompleted` flag in `UserDefaults`, so the migration from `/oidc` to `/oauth` runs again without reinstalling the app.
+6. **Transfer token**: calls `getTransferToken(resource:)` for the test site and shows the token, "No token" or the error.
+
+To run it against a real environment, set up `.env.xcconfig` as described in [Trying it in the example app](#trying-it-in-the-example-app).
 
 ## License
+
 MIT License
 
 Copyright (c) 2025 Bonnier News AB

@@ -644,8 +644,22 @@ final class bn_app_authTests: XCTestCase {
     
     func testDidChange_whenStateCallsDelegate_keychainWrapperSetShouldBeCalled() throws {
         let state = MockHelper.authStateMock()
+        authStorageMock._storedState = state
+        XCTAssertTrue(sut.isAuthorized)
         sut.didChange(state)
         XCTAssert(authStorageMock.storeInvokeCount == 1)
+    }
+
+    func testDidChange_whenStateIsNoLongerCurrent_shouldNotStoreIt() throws {
+        let state = MockHelper.authStateMock()
+        authStorageMock._storedState = state
+        XCTAssertTrue(sut.isAuthorized)
+        sut.clearState()
+
+        sut.didChange(state)
+
+        XCTAssertEqual(authStorageMock.storeInvokeCount, 0)
+        XCTAssertFalse(sut.isAuthorized)
     }
     
     func test_customScopes() throws {
