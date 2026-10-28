@@ -56,6 +56,26 @@ func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>)
 }
 ```
 
+### Trying it in the example app
+
+The [example app](#example-app) reads its client configuration from `Example.xcconfig`, which holds dummy values that can't log in. Your own values go in a local, git-ignored `.env.xcconfig` next to it, which overrides them.
+
+1. Copy the sample:
+   ```bash
+   cp BNAppAuthExampleApp/BNAppAuthExample/.env.xcconfig.sample BNAppAuthExampleApp/BNAppAuthExample/.env.xcconfig
+   ```
+2. Fill in the values for the environment you want to test against. In xcconfig files `//` starts a comment, so write URLs with `:/$()/` instead of `://`, for example `https:/$()/id.bonniernews.se/oauth`.
+
+   | Key | Description |
+   |---|---|
+   | `EXAMPLE_ISSUER` | The id-service issuer URL. |
+   | `EXAMPLE_CLIENT_ID` | The app client's id in that environment. |
+   | `EXAMPLE_LOGIN_REDIRECT_URL` | The client's login redirect URL. |
+   | `EXAMPLE_LOGOUT_REDIRECT_URL` | The client's logout redirect URL. |
+   | `EXAMPLE_TRANSFER_TOKEN_RESOURCE` | The site the **Transfer token** button asks for a token for. It must have a site client in that environment, or the answer is "No token". |
+
+3. Open `BNAppAuthExampleApp/BNAppAuthExample.xcodeproj` and run the app. The values are read at build time, so rebuild after changing them.
+
 ## Configuration
 
 `BNAppAuth.ClientConfiguration` takes the following arguments, in this order:
@@ -177,7 +197,7 @@ With `useMigration: true`, the first `getIdToken` call after an update exchanges
 5. **Exchange token / test migration**: resets the `BnMigrationCompleted` flag in `UserDefaults`, so the migration from `/oidc` to `/oauth` runs again without reinstalling the app.
 6. **Transfer token**: calls `getTransferToken(resource:)` for the test site and shows the token, "No token" or the error.
 
-The client configuration and the site the transfer token button uses come from `BNAppAuthExample/Example.xcconfig`, which holds dummy values. To run the app against a real environment, copy `BNAppAuthExample/.env.xcconfig.sample` to `.env.xcconfig` in the same folder and fill in your values. The file is git-ignored, so it never gets committed. In xcconfig files `//` starts a comment, so write urls with `:/$()/` instead of `://`.
+To run it against a real environment, set up `.env.xcconfig` as described in [Trying it in the example app](#trying-it-in-the-example-app).
 
 ## License
 
