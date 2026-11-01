@@ -126,13 +126,13 @@ final class TransferTokenExchangeTests: XCTestCase {
         XCTAssertEqual(requests.count, 2)
     }
 
-    func testTransferToken_asksAgainOnceAnOriginWithoutLoginHasExpired() async throws {
+    func testTransferToken_asksAgainOnceAnOriginWithoutClientHasExpired() async throws {
         let error = tokenError(TransferTokenExchange.invalidTarget)
         response = { _ in throw error }
         let exchange = makeExchange()
 
         _ = try await exchange.transferToken(resource: siteUrl)
-        time = time.addingTimeInterval(TransferTokenExchange.originWithoutLoginTTL + 1)
+        time = time.addingTimeInterval(TransferTokenExchange.originWithoutClientTTL + 1)
         _ = try await exchange.transferToken(resource: siteUrl)
 
         XCTAssertEqual(requests.count, 2)

@@ -531,13 +531,8 @@ public class BNAppAuth: NSObject {
     /// the exchange fails.
     @MainActor
     public func getTransferToken(resource: URL) async throws -> String? {
-        try await logTransferTokenFailure { try await self.transferTokenExchange.transferToken(resource: resource) }
-    }
-
-    @MainActor
-    private func logTransferTokenFailure(_ transferToken: () async throws -> String?) async throws -> String? {
         do {
-            return try await transferToken()
+            return try await transferTokenExchange.transferToken(resource: resource)
         } catch {
             Logger.authentication.error("getTransferToken failed: %@", error.localizedDescription)
             throw error

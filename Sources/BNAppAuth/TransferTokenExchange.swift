@@ -9,7 +9,7 @@ final class TransferTokenExchange {
     nonisolated static let scope = OIDScopeOpenID
     nonisolated static let invalidTarget = "invalid_target"
     nonisolated static let timeout: TimeInterval = 2
-    nonisolated static let originWithoutLoginTTL: TimeInterval = 24 * 60 * 60
+    nonisolated static let originWithoutClientTTL: TimeInterval = 24 * 60 * 60
 
     private let client: @MainActor () -> BNAppAuth.ClientConfiguration?
     private let freshAccessToken: @MainActor () async throws -> String?
@@ -18,7 +18,7 @@ final class TransferTokenExchange {
     private let timeout: TimeInterval
     private let now: @MainActor () -> Date
 
-    private var originsWithoutLogin: [String: Date] = [:]
+    private var originsWithoutClient: [String: Date] = [:]
 
     nonisolated init(
         client: @escaping @MainActor () -> BNAppAuth.ClientConfiguration?,
@@ -44,7 +44,7 @@ final class TransferTokenExchange {
 
     private func requestTransferToken(origin: String, resource: String) async throws -> String? {
         guard let client = client() else { return nil }
-        guard (originsWithoutLogin[origin] ?? .distantPast) <= now() else {
+        guard (originsWithoutClient[origin] ?? .distantPast) <= now() else {
             Logger.transferToken.debug("No transfer token: %@ has no id-service client", origin)
             return nil
         }
@@ -57,7 +57,7 @@ final class TransferTokenExchange {
             )
         } catch where Self.isInvalidTarget(error) {
             Logger.transferToken.debug("No transfer token: id-service has no client for %@", origin)
-            originsWithoutLogin[origin] = now().addingTimeInterval(Self.originWithoutLoginTTL)
+            originsWithoutClient[origin] = now().addingTimeInterval(Self.originWithoutClientTTL)
             return nil
         }
     }
