@@ -3,3 +3,4 @@
 xcuserdata
 BNAppAuthExampleApp_Android/.idea/deploymentTargetDropDown.xml
 BNAppAuth_iOS/.build
+.env.xcconfig

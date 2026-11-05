@@ -13,15 +13,16 @@ the host apps; this repo also contains a UIKit example app for manual testing.
 ## Layout
 
 ```
-Package.swift                 # SPM manifest — library product "BNAppAuth", iOS 11+
+Package.swift                 # SPM manifest — library product "BNAppAuth", iOS 15+
 Sources/BNAppAuth/
   BNAppAuth.swift             # Public singleton `BNAppAuth.shared` — the whole API
+  TransferTokenExchange.swift # Transfer tokens for other sites, behind BNAppAuth.getTransferToken
   Models/ClientConfiguration.swift
   Definitions/               # TokenResponse, Errors, UserDefaultKeys, +Globals (flow builders, protocols)
   Protocols/Testable.swift   # Seams over OIDAuthorizationService / OIDAuthState for mocking
   Helpers/                   # Logger, JWTDecoder
   AuthStorage/               # AuthStorage (Keychain-backed) + KeychainWrapper + Constants
-Tests/BNAppAuthTests/        # XCTest unit tests + Mocks/ for every injected protocol
+Tests/BNAppAuthTests/        # XCTest unit tests (incl. TransferTokenExchangeTests) + Mocks/ for every injected protocol
 BNAppAuthExampleApp/         # Standalone UIKit sample app (.xcodeproj) — see README for buttons
 .github/workflows/BNAppAuthCITests.yml
 ```

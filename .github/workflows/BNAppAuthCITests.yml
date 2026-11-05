@@ -6,6 +6,9 @@ on:
       - main
       - 'feature/**' 
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run Tests
