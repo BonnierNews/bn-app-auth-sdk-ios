@@ -150,11 +150,11 @@ let token = try await BNAppAuth.shared.getTransferToken(resource: url)
 
 How the app uses the token depends on where the site opens:
 
-- **In a browser:** add the token to the URL as `BNAppAuth.transferTokenParameter` (`idtransfertoken`). The site's connector redeems it, sets the session cookie and redirects to the same URL without the token.
+- **In a browser:** add the token to the URL as the query parameter `idtransfertoken`. The site's connector redeems it, sets the session cookie and redirects to the same URL without the token.
   ```swift
   if let token, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) {
       components.queryItems = (components.queryItems ?? []) + [
-          URLQueryItem(name: BNAppAuth.transferTokenParameter, value: token)
+          URLQueryItem(name: "idtransfertoken", value: token)
       ]
       url = components.url ?? url
   }

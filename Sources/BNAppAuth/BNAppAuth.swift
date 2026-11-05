@@ -6,8 +6,6 @@ import UIKit
 public class BNAppAuth: NSObject {
     public static let shared = BNAppAuth()
 
-    public static let transferTokenParameter = "idtransfertoken"
-
     public weak var delegate: UIViewController?
 
     private let authStorage: AuthStoraging
