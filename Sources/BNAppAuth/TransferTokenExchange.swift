@@ -8,14 +8,12 @@ final class TransferTokenExchange {
     nonisolated static let sessionTransferTokenType = "urn:bonniernews:oauth:token-type:session_transfer_token"
     nonisolated static let scope = OIDScopeOpenID
     nonisolated static let invalidTarget = "invalid_target"
-    nonisolated static let timeout: TimeInterval = 2
     nonisolated static let originWithoutClientTTL: TimeInterval = 24 * 60 * 60
 
     private let client: @MainActor () -> BNAppAuth.ClientConfiguration?
     private let freshAccessToken: @MainActor () async throws -> String?
     private let serviceConfiguration: @MainActor () async throws -> OIDServiceConfiguration
     private let performTokenRequest: @MainActor (OIDTokenRequest) async throws -> OIDTokenResponse?
-    private let timeout: TimeInterval
     private let now: @MainActor () -> Date
 
     private var originsWithoutClient: [String: Date] = [:]
@@ -25,24 +23,22 @@ final class TransferTokenExchange {
         freshAccessToken: @escaping @MainActor () async throws -> String?,
         serviceConfiguration: @escaping @MainActor () async throws -> OIDServiceConfiguration,
         performTokenRequest: @escaping @MainActor (OIDTokenRequest) async throws -> OIDTokenResponse?,
-        timeout: TimeInterval = TransferTokenExchange.timeout,
         now: @escaping @MainActor () -> Date = Date.init
     ) {
         self.client = client
         self.freshAccessToken = freshAccessToken
         self.serviceConfiguration = serviceConfiguration
         self.performTokenRequest = performTokenRequest
-        self.timeout = timeout
         self.now = now
     }
 
-    func transferToken(resource: URL) async throws -> String? {
+    func transferToken(resource: URL, timeout: TimeInterval = BNAppAuth.defaultTransferTokenTimeout) async throws -> String? {
         guard resource.scheme == "https", let host = resource.host, !host.isEmpty else { return nil }
         let origin = "https://\(host.lowercased()):\(resource.port ?? 443)"
-        return try await requestTransferToken(origin: origin, resource: resource.absoluteString)
+        return try await requestTransferToken(origin: origin, resource: resource.absoluteString, timeout: timeout)
     }
 
-    private func requestTransferToken(origin: String, resource: String) async throws -> String? {
+    private func requestTransferToken(origin: String, resource: String, timeout: TimeInterval) async throws -> String? {
         guard let client = client() else { return nil }
         guard (originsWithoutClient[origin] ?? .distantPast) <= now() else {
             Logger.transferToken.debug("No transfer token: %@ has no id-service client", origin)
@@ -53,7 +49,8 @@ final class TransferTokenExchange {
             return try await exchangeWithTimeout(
                 clientId: client.clientId,
                 clientSecret: client.clientSecret,
-                resource: resource
+                resource: resource,
+                timeout: timeout
             )
         } catch where Self.isInvalidTarget(error) {
             Logger.transferToken.debug("No transfer token: id-service has no client for %@", origin)
@@ -65,9 +62,9 @@ final class TransferTokenExchange {
     private func exchangeWithTimeout(
         clientId: String,
         clientSecret: String?,
-        resource: String
+        resource: String,
+        timeout: TimeInterval
     ) async throws -> String? {
-        let timeout = self.timeout
         return try await withCheckedThrowingContinuation { continuation in
             let result = FirstResult(continuation)
             result.race(

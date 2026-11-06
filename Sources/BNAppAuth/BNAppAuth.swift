@@ -5,6 +5,7 @@ import UIKit
 
 public class BNAppAuth: NSObject {
     public static let shared = BNAppAuth()
+    public static let defaultTransferTokenTimeout: TimeInterval = 2
 
     public weak var delegate: UIViewController?
 
@@ -525,12 +526,15 @@ public class BNAppAuth: NSObject {
 
     /// Exchanges the user's access token for a short-lived session transfer token that logs the user in on the
     /// site at `resource`, the https url the app is about to open. Returns nil when no token can be issued right
-    /// now: the user is logged out, id-service has no client for the site, or id-service is too slow. Throws when
-    /// the exchange fails.
+    /// now: the user is logged out, id-service has no client for the site, or id-service didn't answer within
+    /// `timeout` seconds. Throws when the exchange fails.
     @MainActor
-    public func getTransferToken(resource: URL) async throws -> String? {
+    public func getTransferToken(
+        resource: URL,
+        timeout: TimeInterval = BNAppAuth.defaultTransferTokenTimeout
+    ) async throws -> String? {
         do {
-            return try await transferTokenExchange.transferToken(resource: resource)
+            return try await transferTokenExchange.transferToken(resource: resource, timeout: timeout)
         } catch {
             Logger.authentication.error("getTransferToken failed: %@", error.localizedDescription)
             throw error

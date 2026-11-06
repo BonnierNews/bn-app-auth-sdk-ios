@@ -31,10 +31,7 @@ final class TransferTokenExchangeTests: XCTestCase {
         time = Date(timeIntervalSince1970: 0)
     }
 
-    private func makeExchange(
-        client: BNAppAuth.ClientConfiguration? = MockHelper.clientConfiguration(),
-        timeout: TimeInterval = TransferTokenExchange.timeout
-    ) -> TransferTokenExchange {
+    private func makeExchange(client: BNAppAuth.ClientConfiguration? = MockHelper.clientConfiguration()) -> TransferTokenExchange {
         TransferTokenExchange(
             client: { client },
             freshAccessToken: { [unowned self] in self.accessToken },
@@ -43,7 +40,6 @@ final class TransferTokenExchangeTests: XCTestCase {
                 self.requests.append(request)
                 return try await self.response(request)
             },
-            timeout: timeout,
             now: { [unowned self] in self.time }
         )
     }
@@ -159,8 +155,20 @@ final class TransferTokenExchangeTests: XCTestCase {
             return try await respond(request)
         }
 
-        let token = try await makeExchange(timeout: 0.1).transferToken(resource: siteUrl)
+        let token = try await makeExchange().transferToken(resource: siteUrl, timeout: 0.1)
 
         XCTAssertNil(token)
+    }
+
+    func testTransferToken_whenIdServiceAnswersWithinALongerTimeout_shouldReturnTheToken() async throws {
+        let respond = response
+        response = { request in
+            try await Task.sleep(nanoseconds: 300_000_000)
+            return try await respond(request)
+        }
+
+        let token = try await makeExchange().transferToken(resource: siteUrl, timeout: 5)
+
+        XCTAssertEqual(token, "transferToken")
     }
 }
