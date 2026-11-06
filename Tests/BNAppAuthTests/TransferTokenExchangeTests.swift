@@ -163,7 +163,7 @@ final class TransferTokenExchangeTests: XCTestCase {
     func testTransferToken_whenIdServiceAnswersWithinALongerTimeout_shouldReturnTheToken() async throws {
         let respond = response
         response = { request in
-            try await Task.sleep(nanoseconds: 300_000_000)
+            try await Task.sleep(nanoseconds: UInt64((BNAppAuth.defaultTransferTokenTimeout + 0.5) * 1_000_000_000))
             return try await respond(request)
         }
 
