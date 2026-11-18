@@ -38,6 +38,27 @@ final class keychain_wrapperTests: XCTestCase {
         XCTAssertNotNil(securityMock._secureStore["test-key"])
     }
     
+    func testSetDataForKey_shouldBeReadableAfterFirstUnlock() {
+        sut.set("Test".data(using: .utf8)!, forKey: "test-key")
+        let accessible = securityMock._secureStore["test-key"]?[kSecAttrAccessible as String] as? String
+        XCTAssertEqual(accessible, kSecAttrAccessibleAfterFirstUnlock as String)
+    }
+
+    func testSetDataForKey_shouldDeleteOldItemWhateverItsAccessibility() {
+        var deleteQueries: [[String: Any]] = []
+        sut = KeychainWrapper(
+            addFunction: securityMock.SecItemAdd,
+            copyFunction: securityMock.SecItemCopyMatching,
+            deleteFunction: { query in
+                deleteQueries.append(query as? [String: Any] ?? [:])
+                return errSecSuccess
+            }
+        )
+        sut.set("Test".data(using: .utf8)!, forKey: "test-key")
+        XCTAssertEqual(deleteQueries.count, 1)
+        XCTAssertNil(deleteQueries.first?[kSecAttrAccessible as String])
+    }
+
     func testDeleteForKey_shouldRemoveData() {
         sut.set("Test".data(using: .utf8)!, forKey: "test-key")
         XCTAssertNotNil(securityMock._secureStore["test-key"])
