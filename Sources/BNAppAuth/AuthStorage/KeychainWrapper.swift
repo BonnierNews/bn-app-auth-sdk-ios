@@ -56,8 +56,11 @@ internal class KeychainWrapper: KeychainWrapping {
         ]
 
         let _ = deleteFunction(keychainQuery as CFDictionary)
-        
-        let status = addFunction(keychainQuery as CFDictionary, nil)
+
+        // The default (when unlocked) fails reads in background launches on a locked phone, which look logged out.
+        var addQuery = keychainQuery
+        addQuery[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        let status = addFunction(addQuery as CFDictionary, nil)
         if status != errSecSuccess {
             Logger.keychain.debug("Failed to save keychain data for key: %@, with error: %@", key, status.description)
         }
